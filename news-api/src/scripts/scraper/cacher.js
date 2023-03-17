@@ -1,32 +1,55 @@
 // Add raw html response to cache collection
 console.log("Starting cacher.js");
 
-import { connect, connection } from "mongoose";
-import { create } from "../models/cache";
+import * as dotenv from "dotenv";
+dotenv.config();
+import mongoose from "mongoose";
+import model from "../../models/cache.js";
 
-connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = connection;
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
+console.log("[cacher.js] Connecting to Database.");
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("[cacher.js] Connected to Database"));
 
-async function appendToCache(urls, type = "undefined") {
-	urls.forEach(async (url) => {
-		const response = await fetch(url).catch((error) => console.log(error));
+export async function cacher(urls, type = "undefined") {
+	for (let url of urls) {
+		await appendToCache(url, type);
+	}
 
-		if (response.ok) {
-			try {
-				await create({
-					url: url,
-					content: response.text(),
-					publisher: type,
-				});
-			} catch (error) {
-				console.log("[cacher.js:appendToCache] Error: " + error.message);
-			}
-		} else {
-			console.log("[cacher.js:appendToCache] Error: " + response.status);
-		}
-	});
+	console.log("[cacher.js:cacher] Done.");
 }
 
-export default appendToCache;
+async function appendToCache(url, type = "undefined") {
+	console.log("[cacher.js:appendToCache] Fetching " + url);
+
+	const response = await fetch(url)
+		.then((response) => {
+			return response.text();
+		})
+		.catch((error) => {
+			console.log("[cacher.js:appendToCache] Error: " + error.message);
+		});
+
+	// console.log("[cacher.js:appendToCache] Response: " + response);
+
+	if (response !== undefined && response !== null) {
+		try {
+			let result = await model
+				.create({
+					url: url,
+					content: response,
+					publisher: type,
+				})
+				.then((result) => {
+					return result;
+				});
+
+			console.log("[cacher.js:appendToCache] Success. ID: " + result._id);
+		} catch (error) {
+			console.log("[cacher.js:appendToCache] Error: " + error.message);
+		}
+	} else {
+		console.log("[cacher.js:appendToCache] Error: Null response");
+	}
+}

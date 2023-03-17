@@ -1,15 +1,17 @@
 // Parse raw html response from cache
 console.log("Starting parser.js");
 
+require("dotenv").config();
+
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 import { addVnExpressArticle } from "../scripts/scraper/transactor";
 
-import { connect, connection } from "mongoose";
-import { countDocuments, findOne, deleteOne } from "../models/cache";
+import mongoose from "mongoose";
+import { model } from "../models/cache";
 
-connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = connection;
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("[parser.js] Connected to Database"));
 
@@ -36,10 +38,10 @@ function parseDate(publisher, input) {
 	}
 }
 
-async function parseCache() {
-	while ((await countDocuments()) > 0) {
+export async function parseCache() {
+	while ((await model.countDocuments()) > 0) {
 		// fetch oldest doc in cacheSchema
-		const cachedDoc = await findOne({}).sort({ created_at: 1 });
+		const cachedDoc = await model.findOne({}).sort({ created_at: 1 });
 		const parsedDom = domParser(cachedDoc.content);
 
 		switch (cachedDoc.publisher) {
@@ -167,7 +169,7 @@ async function parseCache() {
 					await addVnExpressArticle(newArticle)
 						.then(() => {
 							// delete cachedDoc
-							deleteOne({ _id: cachedDoc._id }, (err) => {
+							model.deleteOne({ _id: cachedDoc._id }, (err) => {
 								console.log("[parser.js:parseCache] Error deleting cachedDoc: " + err);
 							});
 						})
@@ -181,5 +183,3 @@ async function parseCache() {
 		}
 	}
 }
-
-export const parseCache = parseCache;

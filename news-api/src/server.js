@@ -2,10 +2,10 @@ require("dotenv").config();
 
 import express, { json } from "express";
 const app = express();
-import { connect, connection } from "mongoose";
+import mongoose from "mongoose";
 
-connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = connection;
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("[server.js] Connected to Database"));
 

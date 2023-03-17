@@ -1,23 +1,23 @@
 // Add new article to database
 console.log("Starting transactor.js");
 
-import { connect, connection } from "mongoose";
+require("dotenv").config();
 
-import { create } from "../models/vnexpressArticle";
+import mongoose from "mongoose";
 
-connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = connection;
+import { model } from "../models/vnexpressArticle.js";
+
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("[transactor.js] Connected to Database"));
 
-async function addVnExpressArticle(article) {
+export async function addVnExpressArticle(article) {
 	try {
-		await create(article).then((result) => {
+		await model.create(article).then((result) => {
 			console.log("[transactor.js:addVnExpressArticle] Success. ID: " + result._id);
 		});
 	} catch (error) {
 		console.log("[transactor.js:addVnExpressArticle] Error: " + error.message);
 	}
 }
-
-export default addVnExpressArticle;

@@ -1,10 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const vnexpressArticleSchema = new mongoose.Schema({
 	metadata: {
 		id: {
 			type: String,
 			required: true,
+			unique: true,
 		},
 		type: {
 			type: String,

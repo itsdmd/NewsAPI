@@ -9,6 +9,7 @@ const cacheSchema = new Schema({
 	url: {
 		type: String,
 		required: true,
+		unique: true,
 	},
 	content: {
 		type: String,
@@ -17,8 +18,8 @@ const cacheSchema = new Schema({
 	created_at: {
 		type: Date,
 		immutable: true,
-		default: () => Date.now,
+		default: () => Date.now(),
 	},
 });
 
-export default model("Cache", cacheSchema);
+export default model("cache", cacheSchema);

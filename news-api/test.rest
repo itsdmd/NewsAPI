@@ -1,0 +1,9 @@
+GET http://localhost:3000/date
+
+###
+
+GET https://vnexpress.net/thoi-su-p1
+
+###
+
+GET https://vnexpress.net/khu-du-lich-mui-ca-mau-mo-rong-len-42-000-ha-4582157.html

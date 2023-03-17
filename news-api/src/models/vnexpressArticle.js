@@ -2,43 +2,66 @@ const mongoose = require("mongoose");
 
 const vnexpressArticleSchema = new mongoose.Schema({
 	metadata: {
-		url: {
+		id: {
 			type: String,
 			required: true,
 		},
-		categories: [
+		type: {
+			type: String,
+		},
+		typeNew: {
+			type: String,
+		},
+		title: {
+			type: String,
+		},
+		description: {
+			type: String,
+		},
+		keywords: [
 			{
-				name: [String],
-				url: [String],
+				type: String,
+			},
+		],
+		folder: [
+			{
+				id: {
+					type: String,
+				},
+				name: {
+					type: String,
+				},
 			},
 		],
 		tags: [
 			{
-				name: [String],
-				url: [String],
+				url: {
+					type: String,
+				},
+				name: {
+					type: String,
+				},
 			},
 		],
-		publishedDate: {
+		published_date: {
 			type: Date,
-			required: true,
 		},
-		authors: [{ type: String }],
+		authors: [
+			{
+				type: String,
+			},
+		],
 	},
-	contentBlocks: [
+	content_blocks: [
 		{
 			tag: {
 				type: String,
-				enum: ["a", "div", "figcaption", "h1", "h2", "h3", "h4", "h5", "h6", "img", "p"],
-				required: true,
-			},
-			class: {
-				type: String,
-				enum: ["description", "normal", "title", ""],
-				required: true,
 			},
 			content: {
 				type: String,
-				required: true,
+			},
+			attributes: {
+				type: JSON,
 			},
 		},
 	],
@@ -51,9 +74,9 @@ const vnexpressArticleSchema = new mongoose.Schema({
 				url: {
 					type: String,
 				},
-			},
-			url: {
-				type: String,
+				avatar: {
+					type: String,
+				},
 			},
 			content: {
 				type: String,

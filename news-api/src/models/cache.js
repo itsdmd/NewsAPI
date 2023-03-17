@@ -22,4 +22,4 @@ const cacheSchema = new Schema({
 	},
 });
 
-export default model("cache", cacheSchema);
+export default model("Cache", cacheSchema, "cache");

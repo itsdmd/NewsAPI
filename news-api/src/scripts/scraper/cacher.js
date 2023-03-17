@@ -6,18 +6,25 @@ dotenv.config();
 import mongoose from "mongoose";
 import model from "../../models/cache.js";
 
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = mongoose.connection;
-console.log("[cacher.js] Connecting to Database.");
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("[cacher.js] Connected to Database"));
-
-export async function cacher(urls, type = "undefined") {
-	for (let url of urls) {
-		await appendToCache(url, type);
+export async function cacher(urls, type) {
+	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
+		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		return;
 	}
 
-	console.log("[cacher.js:cacher] Done.");
+	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+	const db = mongoose.connection;
+	console.log("[cacher.js] Connecting to Database.");
+	db.on("error", (error) => console.error(error));
+	db.once("open", async () => {
+		console.log("[cacher.js] Connected to Database");
+
+		for (let url of urls) {
+			await appendToCache(url, type);
+		}
+
+		console.log("[cacher.js:cacher] Done.");
+	});
 }
 
 async function appendToCache(url, type = "undefined") {

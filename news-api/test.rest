@@ -6,4 +6,4 @@ GET https://vnexpress.net/thoi-su-p1
 
 ###
 
-GET https://vnexpress.net/khu-du-lich-mui-ca-mau-mo-rong-len-42-000-ha-4582157.html
+GET https://vnexpress.net/19-tap-doan-tong-cong-ty-nha-nuoc-lai-hon-3-5-ty-usd-nam-2022-4582763.html

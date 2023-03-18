@@ -1,17 +1,16 @@
 // Fetch http document from url
 console.log("[fetcher.js]");
 
-export async function fetch(url) {
+export async function fetchHttpText(url) {
 	console.log("[fetcher.js:fetch] Fetching " + url);
 
-	const response = await fetch(url)
+	return await fetch(url)
 		.then((response) => {
 			console.log("[fetcher.js:fetch] Success.");
 			return response.text();
 		})
 		.catch((error) => {
-			console.error("[fetcher.js:fetch] Error: " + error.message);
+			console.log("[fetcher.js:fetch] Error: " + error.message);
+			return;
 		});
-
-	return response;
 }

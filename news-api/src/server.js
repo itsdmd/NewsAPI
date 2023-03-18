@@ -1,29 +1,40 @@
 console.log("[server.js]");
 
-require("dotenv").config();
+import * as dotenv from "dotenv";
+dotenv.config();
 
-import express, { json } from "express";
-const app = express();
+import express from "express";
 import mongoose from "mongoose";
 
-mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("[server.js] Connected to Database"));
-
-app.use(json());
-
-import dateRouter from "./routes/date";
-app.use("/date", dateRouter);
+import { dateRouter } from "./routers/date.js";
+import * as parser from "./scripts/scraper/parser.js";
+import * as scraper from "./scripts/scraper/scraper.js";
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-	console.log("Listening on port " + port);
-});
+async function main() {
+	console.log("[server.js:main]");
 
-function main() {
-	console.log("[main.js]");
+	const app = express();
+
+	app.use(express.json());
+	app.use("/date", dateRouter);
+
+	app.listen(port, () => {
+		console.log("[server.js:main] Listening on port " + port);
+	});
+	/* #endregion */
+
+	/* ------------ scraping ------------ */
+	/* #region   */
+	// await fetcher.fetchHttpText("https://vnexpress.net/thoi-su");
+	// scraper.scrape("vnx", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 5);
+	/* #endregion */
+
+	/* ------------- parsing ------------ */
+	/* #region   */
+	parser.parseCache();
+	/* #endregion */
 }
 
 main();

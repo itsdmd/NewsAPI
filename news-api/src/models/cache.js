@@ -3,12 +3,6 @@ import { Schema, model } from "mongoose";
 const cacheSchema = new Schema({
 	type: {
 		type: String,
-		enum: [
-			"vnx-article", // Article website
-			"vnx-feed", // Feed website (list of articles)
-			"undefined",
-		],
-		default: "undefined",
 	},
 	url: {
 		type: String,

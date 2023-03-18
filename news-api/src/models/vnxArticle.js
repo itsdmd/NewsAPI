@@ -1,8 +1,13 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const vnxArticleSchema = new mongoose.Schema({
+const vnxArticleSchema = new Schema({
 	metadata: {
 		id: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		url: {
 			type: String,
 			required: true,
 			unique: true,
@@ -10,8 +15,12 @@ const vnxArticleSchema = new mongoose.Schema({
 		type: {
 			type: String,
 		},
+		category: {
+			type: String,
+		},
 		title: {
 			type: String,
+			required: true,
 		},
 		description: {
 			type: String,
@@ -33,16 +42,12 @@ const vnxArticleSchema = new mongoose.Schema({
 		],
 		tags: [
 			{
-				url: {
-					type: String,
-				},
-				name: {
-					type: String,
-				},
+				type: String,
 			},
 		],
 		published_date: {
 			type: Date,
+			required: true,
 		},
 		authors: [
 			{
@@ -63,30 +68,6 @@ const vnxArticleSchema = new mongoose.Schema({
 			},
 		},
 	],
-	comments: [
-		{
-			author: {
-				username: {
-					type: String,
-				},
-				url: {
-					type: String,
-				},
-				avatar: {
-					type: String,
-				},
-			},
-			content: {
-				type: String,
-			},
-			createdAt: {
-				type: Date,
-			},
-			likes: {
-				type: Number,
-			},
-		},
-	],
 });
 
-module.exports = mongoose.model("vnxArticle", vnxArticleSchema, "vnx_articles");
+export default model("vnxArticle", vnxArticleSchema, "vnx_articles");

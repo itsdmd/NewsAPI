@@ -1,69 +1,73 @@
 // Add raw html response to cache collection
 console.log("[cacher.js]");
 
-export async function cacher(urls, type) {
-	console.log("[cacher.js:cacher] url: " + urls + ", type: " + type);
+import * as dotenv from "dotenv";
+dotenv.config();
+import mongoose from "mongoose";
 
-	/* --------- connect to dtb --------- */
-	let dotenv = await import("dotenv").then((dotenv) => {
-		return dotenv;
-	});
-	dotenv.config();
-	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.error("[cacher.js:cacher] Error: DATABASE_URL is not defined.");
-		return;
-	}
+import cacheModel from "../../models/cache.js";
+import vnxModal from "../../models/vnxArticle.js";
+import * as fetcher from "./fetcher.js";
 
-	let mongoose = await import("mongoose").then((mongoose) => {
-		return mongoose;
-	});
-
-	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
-	const db = mongoose.connection;
-	console.log("[cacher.js:cacher] Connecting to Database.");
-
-	db.on("error", (error) => console.error("[cacher.js:cacher] Error connecting to database: " + error));
-	db.once("open", async () => {
-		console.log("[cacher.js:cacher] Connected to Database");
-
-		for (let url of urls) {
-			await addTocache(url, type);
-		}
-
-		console.log("[cacher.js:cacher] Done.");
-	});
+if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
+	console.log("[cacher.js] Error: DATABASE_URL is not defined.");
 }
 
-async function addTocache(url, type = "undefined") {
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+const db = mongoose.connection;
+console.log("[cacher.js] Connecting to Database.");
+/* #endregion */
+
+db.on("error", (error) => console.log("[cacher.js] Error connecting to database: " + error));
+db.once("open", async () => {
+	console.log("[cacher.js] Connected to Database");
+});
+
+export async function cache(urls, type) {
+	console.log("[cacher.js:cache] url: " + urls + ", type: " + type);
+
+	for (let url of urls) {
+		await addTocache(url, type);
+	}
+
+	console.log("[cacher.js:cache] Done.");
+}
+
+async function addTocache(url, type) {
 	console.log("[cacher.js:addTocache] url: " + url + ", type: " + type);
 
-	let fetcher = await import("./fetcher.js").then((fetcher) => {
-		return fetcher;
-	});
+	// check if url exist in database of type
+	switch (type) {
+		case "vnx-article": {
+			if (vnxModal.find({ metadata: { url: url } }).count() > 0) {
+				console.log("[cacher.js:addTocache] url: " + url + " already exist in database.");
+				return;
+			}
+		}
+	}
 
-	let response = await fetcher.fetch(url);
-
-	let model = await import("../../models/cache.js").then((model) => {
-		return model;
-	});
+	let response = await fetcher.fetchHttpText(url);
 
 	if (response !== undefined && response !== null) {
 		try {
-			let result = await model
+			let result = await cacheModel
 				.create({
+					type: type,
 					url: url,
 					content: response,
-					publisher: type,
 				})
 				.then((result) => {
 					return result;
 				});
 
 			console.log("[cacher.js:addTocache] Success. ID: " + result._id);
+			return;
 		} catch (error) {
-			console.error("[cacher.js:addTocache] Error: " + error.message);
+			console.log("[cacher.js:addTocache] Error: " + error.message);
+			return;
 		}
 	} else {
-		console.error("[cacher.js:addTocache] Error: Null response");
+		console.log("[cacher.js:addTocache] Error: Null response");
+		return;
 	}
 }

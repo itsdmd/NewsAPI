@@ -2,15 +2,15 @@
 console.log("[parser.js]");
 
 import * as dotenv from "dotenv";
-dotenv.config();
 
 import jsdom from "jsdom";
-const { JSDOM } = jsdom;
-
 import mongoose from "mongoose";
-import model from "../../models/cache.js";
 
+import cacheModel from "../../models/cache.js";
 import * as transactor from "./transactor.js";
+
+dotenv.config();
+const { JSDOM } = jsdom;
 
 /* #region   */
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
@@ -208,14 +208,14 @@ export async function parseJsdom(dom, mode) {
 export async function parseCache() {
 	console.log("[parser.js:parseCache]");
 
-	let numOfCachedDocs = await model.count();
+	let numOfCachedDocs = await cacheModel.count();
 	console.log("[parser.js:parseCache] numOfDocs: " + numOfCachedDocs);
 
 	while (numOfCachedDocs > 0) {
 		// create new vnexpressArticle
 		try {
 			// fetch oldest doc in cacheSchema
-			const cachedDoc = await model
+			const cachedDoc = await cacheModel
 				.findOne({})
 				.sort({ created_at: 1 })
 				.catch((err) => {
@@ -234,7 +234,7 @@ export async function parseCache() {
 				.addVnxArticle(parsedHttp)
 				.then(async () => {
 					// delete cachedDoc;
-					await model
+					await cacheModel
 						.deleteOne({ _id: cachedDoc._id })
 						.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 						.catch((err) => {

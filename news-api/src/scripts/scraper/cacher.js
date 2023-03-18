@@ -2,12 +2,13 @@
 console.log("[cacher.js]");
 
 import * as dotenv from "dotenv";
-dotenv.config();
 import mongoose from "mongoose";
 
+import * as fetcher from "./fetcher.js";
 import cacheModel from "../../models/cache.js";
 import vnxModal from "../../models/vnxArticle.js";
-import * as fetcher from "./fetcher.js";
+
+dotenv.config();
 
 if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
 	console.log("[cacher.js] Error: DATABASE_URL is not defined.");

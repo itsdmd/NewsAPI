@@ -1,17 +1,22 @@
 // Scrape the news website for articles
 console.log("[scraper.js]");
 
+import * as cacher from "./cacher.js";
 import * as fetcher from "./fetcher.js";
 import * as parser from "./parser.js";
-import * as cacher from "./cacher.js";
 
-export async function scrape(mode, baseUrl, startUrl, limit = -1) {
+// set limit = -1 to scrape all pages
+export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 	console.log("[scraper.js:scrape] mode: " + mode + ", url: " + startUrl + ", limit: " + limit);
 
 	switch (mode) {
 		case "vnx": {
 			let i = limit;
 			while (i !== 0) {
+				if (startUrl === baseUrl + "undefined") {
+					break;
+				}
+
 				// the url passed in is the first page of the feed
 				let html = parser.htmlToJsdom(await fetcher.fetchHttpText(startUrl));
 

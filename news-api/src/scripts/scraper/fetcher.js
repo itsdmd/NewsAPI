@@ -10,7 +10,7 @@ export async function fetch(url) {
 			return response.text();
 		})
 		.catch((error) => {
-			console.log("[fetcher.js:appendToCache] Error: " + error.message);
+			console.error("[fetcher.js:appendToCache] Error: " + error.message);
 		});
 
 	return response;

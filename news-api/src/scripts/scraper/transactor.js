@@ -7,7 +7,7 @@ export async function addVnExpressArticle(article) {
 	});
 	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[transactor.js] Error: DATABASE_URL is not defined.");
+		console.error("[transactor.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -32,7 +32,7 @@ export async function addVnExpressArticle(article) {
 				console.log("[transactor.js:addVnExpressArticle] Success. ID: " + result._id);
 			});
 		} catch (error) {
-			console.log("[transactor.js:addVnExpressArticle] Error: " + error.message);
+			console.error("[transactor.js:addVnExpressArticle] Error: " + error.message);
 		}
 	});
 }

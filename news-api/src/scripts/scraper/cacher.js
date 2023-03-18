@@ -8,7 +8,7 @@ export async function cacher(urls, type) {
 	});
 	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		console.error("[cacher.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -57,9 +57,9 @@ async function appendToCache(url, type = "undefined") {
 
 			console.log("[cacher.js:appendToCache] Success. ID: " + result._id);
 		} catch (error) {
-			console.log("[cacher.js:appendToCache] Error: " + error.message);
+			console.error("[cacher.js:appendToCache] Error: " + error.message);
 		}
 	} else {
-		console.log("[cacher.js:appendToCache] Error: Null response");
+		console.error("[cacher.js:appendToCache] Error: Null response");
 	}
 }

@@ -8,7 +8,7 @@ async function scrape(mode, url) {
 		}
 
 		default:
-			console.log("[scraper.js:scrape] Error: Invalid mode");
+			console.error("[scraper.js:scrape] Error: Invalid mode");
 			break;
 	}
 }

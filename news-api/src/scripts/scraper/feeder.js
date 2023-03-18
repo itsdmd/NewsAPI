@@ -13,5 +13,5 @@ export async function feed(urls) {
 	});
 	await cacher(urls, "vnexpress-article")
 		.then(() => console.log("[feeder.js:feed] Success"))
-		.catch((error) => console.log("[feeder.js:feed] Error: " + error.message));
+		.catch((error) => console.error("[feeder.js:feed] Error: " + error.message));
 }

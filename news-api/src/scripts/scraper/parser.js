@@ -34,19 +34,15 @@ export async function parseCache() {
 		return dotenv;
 	});
 	dotenv.config();
+
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[parser.js] Error: DATABASE_URL is not defined.");
+		console.error("[parser.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
 	let mongoose = await import("mongoose").then((mongoose) => {
 		return mongoose;
 	});
-
-	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[parser.js] Error: DATABASE_URL is not defined.");
-		return;
-	}
 
 	let model = await import("../../models/cache.js").then((model) => {
 		return model;
@@ -200,11 +196,18 @@ export async function parseCache() {
 								});
 							})
 							.catch((err) => {
-								console.log("[parser.js:parseCache] Error when call transactor: " + err);
+								console.error("[parser.js:parseCache] Error when call transactor: " + err);
 							});
 					} catch (err) {
-						console.log("[parser.js:parseCache] Error: " + err);
+						console.error("[parser.js:parseCache] Error: " + err);
 					}
+
+					break;
+				}
+
+				default: {
+					console.error("[parser.js:parseCache] Unknown publisher: " + cachedDoc.publisher);
+					break;
 				}
 			}
 		}

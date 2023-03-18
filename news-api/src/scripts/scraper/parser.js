@@ -1,16 +1,12 @@
 // Parse raw html response from cache
 console.log("Starting parser.js");
 
-require("dotenv").config();
+async function domParser(content) {
+	let jsdom = await import("jsdom").then((jsdom) => {
+		return jsdom;
+	});
+	const { JSDOM } = jsdom;
 
-import jsdom from "jsdom";
-const { JSDOM } = jsdom;
-import { addVnExpressArticle } from "../scripts/scraper/transactor";
-
-import mongoose from "mongoose";
-import { model } from "../models/cache";
-
-function domParser(content) {
 	return new JSDOM(content).window.document;
 }
 
@@ -34,10 +30,27 @@ function parseDate(publisher, input) {
 }
 
 export async function parseCache() {
+	let dotenv = await import("dotenv").then((dotenv) => {
+		return dotenv;
+	});
+	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
 		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
+
+	let mongoose = await import("mongoose").then((mongoose) => {
+		return mongoose;
+	});
+
+	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
+		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		return;
+	}
+
+	let model = await import("../../models/cache.js").then((model) => {
+		return model;
+	});
 
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
@@ -60,7 +73,7 @@ export async function parseCache() {
 
 					// type
 					const type = parsedDom.querySelector("meta[name*='tt_page_type']").getAttribute("content");
-					const typeNew = parsedDom.querySelector("meta[name*='tt_page_type_new']").getAttribute("content");
+
 					// title
 					const title = parsedDom.querySelector("h1.title-detail").textContent;
 
@@ -173,7 +186,12 @@ export async function parseCache() {
 							comments: allCmts,
 						};
 
-						await addVnExpressArticle(newArticle)
+						let transactor = await import("../scripts/scraper/transactor").then((model) => {
+							return model;
+						});
+
+						await transactor
+							.addVnExpressArticle(newArticle)
 							.then(() => {
 								// delete cachedDoc
 								model.deleteOne({ _id: cachedDoc._id }, (err) => {

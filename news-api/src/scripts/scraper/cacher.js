@@ -1,16 +1,19 @@
 // Add raw html response to cache collection
 console.log("Starting cacher.js");
 
-import * as dotenv from "dotenv";
-dotenv.config();
-import mongoose from "mongoose";
-import model from "../../models/cache.js";
-
 export async function cacher(urls, type) {
+	let dotenv = await import("dotenv").then((dotenv) => {
+		return dotenv;
+	});
+	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
 		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
+
+	let mongoose = await import("mongoose").then((mongoose) => {
+		return mongoose;
+	});
 
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
@@ -28,17 +31,15 @@ export async function cacher(urls, type) {
 }
 
 async function appendToCache(url, type = "undefined") {
-	console.log("[cacher.js:appendToCache] Fetching " + url);
+	let fetcher = await import("./fetcher.js").then((fetcher) => {
+		return fetcher;
+	});
 
-	const response = await fetch(url)
-		.then((response) => {
-			return response.text();
-		})
-		.catch((error) => {
-			console.log("[cacher.js:appendToCache] Error: " + error.message);
-		});
+	let response = await fetcher.fetch(url);
 
-	// console.log("[cacher.js:appendToCache] Response: " + response);
+	let model = await import("../../models/cache.js").then((model) => {
+		return model;
+	});
 
 	if (response !== undefined && response !== null) {
 		try {

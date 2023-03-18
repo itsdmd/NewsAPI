@@ -10,9 +10,6 @@ const vnexpressArticleSchema = new mongoose.Schema({
 		type: {
 			type: String,
 		},
-		typeNew: {
-			type: String,
-		},
 		title: {
 			type: String,
 		},

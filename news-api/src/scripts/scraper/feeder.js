@@ -1,15 +1,17 @@
-import { cacher } from "./cacher.js";
+// Feed fetched urls into cacher
+console.log("Starting feeder.js");
 
-async function feed() {
-	const urls = [
+export async function feed(urls) {
+	urls = [
 		"https://vnexpress.net/rao-chan-nha-g6a-thanh-cong-4582550.html",
 		"https://vnexpress.net/bo-truong-cong-an-ly-giai-de-xuat-cap-can-cuoc-cho-tre-duoi-14-tuoi-4582359.html",
 		"https://vnexpress.net/alcaraz-de-doa-dinh-bang-atp-cua-djokovic-4582578.html",
 	];
 
+	let cacher = await import("./cacher.js").then((cacher) => {
+		return cacher;
+	});
 	await cacher(urls, "vnexpress-article")
 		.then(() => console.log("[feeder.js:feed] Success"))
 		.catch((error) => console.log("[feeder.js:feed] Error: " + error.message));
 }
-
-await feed();

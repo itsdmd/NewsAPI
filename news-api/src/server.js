@@ -1,3 +1,5 @@
+console.log("[server.js]");
+
 require("dotenv").config();
 
 import express, { json } from "express";
@@ -19,3 +21,9 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
 	console.log("Listening on port " + port);
 });
+
+function main() {
+	console.log("[main.js]");
+}
+
+main();

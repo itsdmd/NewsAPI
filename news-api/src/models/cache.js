@@ -3,7 +3,11 @@ import { Schema, model } from "mongoose";
 const cacheSchema = new Schema({
 	type: {
 		type: String,
-		enum: ["vnexpress-article", "vnexpress-category", "vnexpress-tag", "undefined"],
+		enum: [
+			"vnx-article", // Article website
+			"vnx-feed", // Feed website (list of articles)
+			"undefined",
+		],
 		default: "undefined",
 	},
 	url: {
@@ -22,4 +26,4 @@ const cacheSchema = new Schema({
 	},
 });
 
-export default model("Cache", cacheSchema, "cache");
+export default model("cache", cacheSchema, "cache");

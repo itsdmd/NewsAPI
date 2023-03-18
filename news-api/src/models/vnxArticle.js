@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const vnexpressArticleSchema = new mongoose.Schema({
+const vnxArticleSchema = new mongoose.Schema({
 	metadata: {
 		id: {
 			type: String,
@@ -89,4 +89,4 @@ const vnexpressArticleSchema = new mongoose.Schema({
 	],
 });
 
-module.exports = mongoose.model("VnExpressArticle", vnexpressArticleSchema);
+module.exports = mongoose.model("vnxArticle", vnxArticleSchema, "vnx_articles");

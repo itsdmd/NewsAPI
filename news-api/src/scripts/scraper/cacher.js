@@ -2,13 +2,15 @@
 console.log("[cacher.js]");
 
 export async function cacher(urls, type) {
+	console.log("[cacher.js:cacher] url: " + urls + ", type: " + type);
+
 	/* --------- connect to dtb --------- */
 	let dotenv = await import("dotenv").then((dotenv) => {
 		return dotenv;
 	});
 	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.error("[cacher.js] Error: DATABASE_URL is not defined.");
+		console.error("[cacher.js:cacher] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -18,21 +20,23 @@ export async function cacher(urls, type) {
 
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
-	console.log("[cacher.js] Connecting to Database.");
+	console.log("[cacher.js:cacher] Connecting to Database.");
 
-	db.on("error", (error) => console.error("[cacher.js] Error connecting to database: " + error));
+	db.on("error", (error) => console.error("[cacher.js:cacher] Error connecting to database: " + error));
 	db.once("open", async () => {
-		console.log("[cacher.js] Connected to Database");
+		console.log("[cacher.js:cacher] Connected to Database");
 
 		for (let url of urls) {
-			await appendToCache(url, type);
+			await addTocache(url, type);
 		}
 
 		console.log("[cacher.js:cacher] Done.");
 	});
 }
 
-async function appendToCache(url, type = "undefined") {
+async function addTocache(url, type = "undefined") {
+	console.log("[cacher.js:addTocache] url: " + url + ", type: " + type);
+
 	let fetcher = await import("./fetcher.js").then((fetcher) => {
 		return fetcher;
 	});
@@ -55,11 +59,11 @@ async function appendToCache(url, type = "undefined") {
 					return result;
 				});
 
-			console.log("[cacher.js:appendToCache] Success. ID: " + result._id);
+			console.log("[cacher.js:addTocache] Success. ID: " + result._id);
 		} catch (error) {
-			console.error("[cacher.js:appendToCache] Error: " + error.message);
+			console.error("[cacher.js:addTocache] Error: " + error.message);
 		}
 	} else {
-		console.error("[cacher.js:appendToCache] Error: Null response");
+		console.error("[cacher.js:addTocache] Error: Null response");
 	}
 }

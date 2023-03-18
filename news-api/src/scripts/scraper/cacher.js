@@ -39,7 +39,7 @@ async function addTocache(url, type) {
 	// check if url exist in database of type
 	switch (type) {
 		case "vnx-article": {
-			if (vnxModal.find({ metadata: { url: url } }).count() > 0) {
+			if (await vnxModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
 				console.log("[cacher.js:addTocache] url: " + url + " already exist in database.");
 				return;
 			}

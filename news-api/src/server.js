@@ -10,6 +10,8 @@ import { dateRouter } from "./routers/date.js";
 import * as parser from "./scripts/scraper/parser.js";
 import * as scraper from "./scripts/scraper/scraper.js";
 
+import vnxModal from "./models/vnxArticle.js";
+
 const port = process.env.PORT || 3000;
 
 async function main() {
@@ -27,8 +29,7 @@ async function main() {
 
 	/* ------------ scraping ------------ */
 	/* #region   */
-	// await fetcher.fetchHttpText("https://vnexpress.net/thoi-su");
-	scraper.scrape("vnx", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 5).then(() => {
+	scraper.scrape("vnx", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 1).then(() => {
 		console.log("[server.js:main] Done scraping");
 
 		parser.parseCache();

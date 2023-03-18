@@ -1,5 +1,5 @@
 // Scrape the news website for articles
-console.log("Starting scraper.js");
+console.log("[scraper.js]");
 
 async function scrape(mode, url) {
 	switch (mode) {

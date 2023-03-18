@@ -1,5 +1,5 @@
 // Parse raw html response from cache
-console.log("Starting parser.js");
+console.log("[parser.js]");
 
 async function domParser(content) {
 	let jsdom = await import("jsdom").then((jsdom) => {
@@ -35,7 +35,7 @@ export async function parseCache() {
 	});
 	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		console.log("[parser.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -44,7 +44,7 @@ export async function parseCache() {
 	});
 
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		console.log("[parser.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -54,10 +54,11 @@ export async function parseCache() {
 
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
-	console.log("[cacher.js] Connecting to Database.");
-	db.on("error", (error) => console.error(error));
+	console.log("[parser.js] Connecting to Database.");
+
+	db.on("error", (error) => console.error("[parser.js] Error connecting to database: " + error));
 	db.once("open", async () => {
-		console.log("[cacher.js] Connected to Database");
+		console.log("[parser.js] Connected to Database");
 
 		while ((await model.countDocuments()) > 0) {
 			// fetch oldest doc in cacheSchema

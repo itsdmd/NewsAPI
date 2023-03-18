@@ -1,5 +1,5 @@
 // Fetch http document from url
-console.log("Starting fetcher.js");
+console.log("[fetcher.js]");
 
 export async function fetch(url) {
 	console.log("[fetcher.js:fetch] Fetching " + url);

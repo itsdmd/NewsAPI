@@ -1,7 +1,8 @@
 // Add raw html response to cache collection
-console.log("Starting cacher.js");
+console.log("[cacher.js]");
 
 export async function cacher(urls, type) {
+	/* --------- connect to dtb --------- */
 	let dotenv = await import("dotenv").then((dotenv) => {
 		return dotenv;
 	});
@@ -18,7 +19,8 @@ export async function cacher(urls, type) {
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
 	console.log("[cacher.js] Connecting to Database.");
-	db.on("error", (error) => console.error(error));
+
+	db.on("error", (error) => console.error("[cacher.js] Error connecting to database: " + error));
 	db.once("open", async () => {
 		console.log("[cacher.js] Connected to Database");
 

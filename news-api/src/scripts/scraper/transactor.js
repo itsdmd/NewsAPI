@@ -1,5 +1,5 @@
 // Add new article to database
-console.log("Starting transactor.js");
+console.log("[transactor.js]");
 
 export async function addVnExpressArticle(article) {
 	let dotenv = await import("dotenv").then((dotenv) => {
@@ -7,7 +7,7 @@ export async function addVnExpressArticle(article) {
 	});
 	dotenv.config();
 	if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
-		console.log("[cacher.js] Error: DATABASE_URL is not defined.");
+		console.log("[transactor.js] Error: DATABASE_URL is not defined.");
 		return;
 	}
 
@@ -17,10 +17,11 @@ export async function addVnExpressArticle(article) {
 
 	mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 	const db = mongoose.connection;
-	console.log("[cacher.js] Connecting to Database.");
-	db.on("error", (error) => console.error(error));
+	console.log("[transactor.js] Connecting to Database.");
+
+	db.on("error", (error) => console.error("[transactor.js] Error connecting to database: " + error));
 	db.once("open", async () => {
-		console.log("[cacher.js] Connected to Database");
+		console.log("[transactor.js] Connected to Database");
 
 		try {
 			let model = await import("../models/vnexpressArticle.js").then((model) => {

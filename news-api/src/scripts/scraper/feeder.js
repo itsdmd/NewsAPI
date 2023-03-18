@@ -1,5 +1,5 @@
 // Feed fetched urls into cacher
-console.log("Starting feeder.js");
+console.log("[feeder.js]");
 
 export async function feed(urls) {
 	urls = [

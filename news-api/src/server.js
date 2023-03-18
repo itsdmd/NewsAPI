@@ -28,12 +28,11 @@ async function main() {
 	/* ------------ scraping ------------ */
 	/* #region   */
 	// await fetcher.fetchHttpText("https://vnexpress.net/thoi-su");
-	// scraper.scrape("vnx", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 5);
-	/* #endregion */
+	scraper.scrape("vnx", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 5).then(() => {
+		console.log("[server.js:main] Done scraping");
 
-	/* ------------- parsing ------------ */
-	/* #region   */
-	parser.parseCache();
+		parser.parseCache();
+	});
 	/* #endregion */
 }
 

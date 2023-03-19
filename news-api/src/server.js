@@ -61,4 +61,4 @@ async function test() {
 // 	-1
 // );
 
-await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", -1);
+await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-5.htm", -1);

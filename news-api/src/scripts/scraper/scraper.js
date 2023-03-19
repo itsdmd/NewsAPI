@@ -103,6 +103,8 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 			while (i !== 0) {
 				// https://tuoitre.vn/timeline/3/trang-1.htm
+				// https://tuoitre.vn/timeline/3/trang-10.htm
+				// https://tuoitre.vn/timeline/3/trang-100.htm
 				// timeline:
 				// 		3:news
 				// 		11:business
@@ -118,7 +120,8 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 						return;
 					}
 
-					let page = parseInt(startUrl.substring(startUrl.length - 5, startUrl.length - 4));
+					// page number between the last - and before .htm
+					let page = parseInt(startUrl.substring(startUrl.lastIndexOf("-") + 1, startUrl.lastIndexOf(".htm")));
 					page++;
 					startUrl = baseUrl + "trang-" + page.toString() + ".htm";
 

@@ -6,7 +6,10 @@ import mongoose from "mongoose";
 
 import * as fetcher from "./fetcher.js";
 import cacheModel from "../../models/cache.js";
-import vnxModal from "../../models/vnxArticle.js";
+import vnxVnModal from "../../models/vnxArticleVn.js";
+import vnxEnModal from "../../models/vnxArticleEn.js";
+import ttVnModal from "../../models/ttArticleVn.js";
+import ttEnModal from "../../models/ttArticleEn.js";
 
 dotenv.config();
 
@@ -27,48 +30,92 @@ db.once("open", async () => {
 export async function cache(urls, type) {
 	console.log("[cacher.js:cache] url: " + urls + ", type: " + type);
 
+	if (urls.length === 0 || urls === undefined || urls === null) {
+		console.log("[cacher.js:cache] Error: urls is undefined or null.");
+
+		throw new Error("urls is undefined or null.");
+	}
+
 	for (let url of urls) {
-		await addTocache(url, type);
+		await addToCache(url, type);
 	}
 
 	console.log("[cacher.js:cache] Done.");
 }
 
-async function addTocache(url, type) {
-	console.log("[cacher.js:addTocache] url: " + url + ", type: " + type);
+export async function addToCache(url, type) {
+	console.log("[cacher.js:addToCache] url: " + url + ", type: " + type);
 
 	// check if url exist in database of type
+	let exist = false;
 	switch (type) {
-		case "vnx-article": {
-			if (await vnxModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
-				console.log("[cacher.js:addTocache] url: " + url + " already exist in database.");
+		case "vnx-vn": {
+			if (await vnxVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+				exist = true;
 				return;
+			} else {
+				break;
 			}
+		}
+
+		case "vnx-en": {
+			if (await vnxEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+				exist = true;
+				return;
+			} else {
+				break;
+			}
+		}
+
+		case "tt-vn": {
+			if (await ttVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+				exist = true;
+				return;
+			} else {
+				break;
+			}
+		}
+
+		case "tt-en": {
+			if (await ttEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+				exist = true;
+				return;
+			} else {
+				break;
+			}
+		}
+
+		default: {
+			console.log("[cacher.js:addToCache] Error: type is not defined.");
+			return;
 		}
 	}
 
-	let response = await fetcher.fetchHttpText(url);
+	if (exist) {
+		return;
+	}
 
-	if (response !== undefined && response !== null) {
-		try {
-			let result = await cacheModel
-				.create({
-					type: type,
-					url: url,
-					content: response,
-				})
-				.then((result) => {
-					return result;
-				});
+	try {
+		let response = await fetcher.fetchHttpText(url);
 
-			console.log("[cacher.js:addTocache] Success. ID: " + result._id);
-			return;
-		} catch (error) {
-			console.log("[cacher.js:addTocache] Error: " + error.message);
-			return;
-		}
-	} else {
-		console.log("[cacher.js:addTocache] Error: Null response");
+		let result = await cacheModel
+			.create({
+				type: type,
+				url: url,
+				content: response,
+			})
+			.then((result) => {
+				return result;
+			});
+
+		console.log("[cacher.js:addToCache] Success. ID: " + result._id);
+		return;
+	} catch (error) {
+		console.log("[cacher.js:addToCache] Error: " + error.message);
 		return;
 	}
 }

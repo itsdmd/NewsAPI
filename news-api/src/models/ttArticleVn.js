@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const vnxArticleSchema = new Schema({
+const ttVnArticleSchema = new Schema({
 	metadata: {
 		id: {
 			type: String,
@@ -12,9 +12,6 @@ const vnxArticleSchema = new Schema({
 			required: true,
 			unique: true,
 		},
-		type: {
-			type: String,
-		},
 		category: {
 			type: String,
 		},
@@ -25,33 +22,28 @@ const vnxArticleSchema = new Schema({
 		description: {
 			type: String,
 		},
-		keywords: [
-			{
-				type: String,
-			},
-		],
-		folder: [
-			{
-				id: {
-					type: String,
-				},
-				name: {
-					type: String,
-				},
-			},
-		],
 		tags: [
 			{
-				type: String,
+				title: {
+					type: String,
+				},
+				url: {
+					type: String,
+				},
 			},
 		],
-		published_date: {
+		publish_date: {
 			type: Date,
 			required: true,
 		},
 		authors: [
 			{
-				type: String,
+				title: {
+					type: String,
+				},
+				url: {
+					type: String,
+				},
 			},
 		],
 	},
@@ -70,4 +62,4 @@ const vnxArticleSchema = new Schema({
 	],
 });
 
-export default model("vnxArticle", vnxArticleSchema, "vnx_articles");
+export default model("ttVnArticle", ttVnArticleSchema, "tt_vn_articles");

@@ -7,3 +7,27 @@ GET https://vnexpress.net/thoi-su-p1
 ###
 
 GET https://vnexpress.net/19-tap-doan-tong-cong-ty-nha-nuoc-lai-hon-3-5-ty-usd-nam-2022-4582763.html
+
+###
+
+GET https://e.vnexpress.net/category/listcategory/category_id/1003894/page/1
+
+###
+
+GET https://e.vnexpress.net/news/news/heaviest-sea-turtle-seen-in-thua-thien-hue-released-back-to-ocean-4582150.html
+
+###
+
+GET https://tuoitre.vn/thoi-su/trang-1.htm
+
+###
+
+GET https://tuoitre.vn/cong-bo-so-dien-thoai-de-xu-ly-chuan-hoa-thong-tin-thue-bao-di-dong-20230318182559955.htm
+
+###
+
+GET https://tuoitre.vn/quoc-hoi-my-chia-re-vu-cam-tiktok-20230301121811715.htm
+
+###
+
+GET https://tuoitre.vn/thanh-thep-roi-lam-3-nguoi-di-vien-cong-truong-lap-luoi-an-toan-nhung-ho-hung-nhu-khong-20230314224150754.htm

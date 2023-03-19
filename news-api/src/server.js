@@ -41,14 +41,12 @@ async function main(mode, baseUrl, startUrl, limit = 1) {
 
 // import * as cacher from "./scripts/scraper/cacher.js";
 async function test() {
-	// await cacher.addToCache("https://tuoitre.vn/quoc-hoi-my-chia-re-vu-cam-tiktok-20230301121811715.htm", "tt-vn");
-
 	await parser.parseCache("tt-vn").finally(() => {
 		console.log("[server.js:main] Done parsing");
 	});
 }
 
-// await test();
+await test();
 
 // await main("vnx-vn", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 2).then(() => {
 // 	main("vnx-vn", "https://vnexpress.net", "https://vnexpress.net/kinh-doanh", 2);
@@ -61,4 +59,4 @@ async function test() {
 // 	-1
 // );
 
-await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-5.htm", -1);
+// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-5.htm", -1);

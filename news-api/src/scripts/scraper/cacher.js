@@ -43,61 +43,61 @@ export async function cache(urls, type) {
 	console.log("[cacher.js:cache] Done.");
 }
 
-export async function addToCache(url, type) {
+export async function addToCache(url, type, skipped = false) {
 	console.log("[cacher.js:addToCache] url: " + url + ", type: " + type);
 
 	// check if url exist in database of type
-	let exist = false;
-	switch (type) {
-		case "vnx-vn": {
-			if (await vnxVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
-				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
-				exist = true;
-				return;
-			} else {
-				break;
-			}
-		}
+	// let exist = false;
+	// switch (type) {
+	// 	case "vnx-vn": {
+	// 		if (await vnxVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+	// 			console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+	// 			exist = true;
+	// 			return;
+	// 		} else {
+	// 			break;
+	// 		}
+	// 	}
 
-		case "vnx-en": {
-			if (await vnxEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
-				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
-				exist = true;
-				return;
-			} else {
-				break;
-			}
-		}
+	// 	case "vnx-en": {
+	// 		if (await vnxEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+	// 			console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+	// 			exist = true;
+	// 			return;
+	// 		} else {
+	// 			break;
+	// 		}
+	// 	}
 
-		case "tt-vn": {
-			if (await ttVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
-				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
-				exist = true;
-				return;
-			} else {
-				break;
-			}
-		}
+	// 	case "tt-vn": {
+	// 		if (await ttVnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+	// 			console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+	// 			exist = true;
+	// 			return;
+	// 		} else {
+	// 			break;
+	// 		}
+	// 	}
 
-		case "tt-en": {
-			if (await ttEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
-				console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
-				exist = true;
-				return;
-			} else {
-				break;
-			}
-		}
+	// 	case "tt-en": {
+	// 		if (await ttEnModal.findOne({ "metadata.url": url }).countDocuments().exec()) {
+	// 			console.log("[cacher.js:addToCache] url: " + url + " already exist in database.");
+	// 			exist = true;
+	// 			return;
+	// 		} else {
+	// 			break;
+	// 		}
+	// 	}
 
-		default: {
-			console.log("[cacher.js:addToCache] Error: type is not defined.");
-			return;
-		}
-	}
+	// 	default: {
+	// 		console.log("[cacher.js:addToCache] Error: type is not defined.");
+	// 		return;
+	// 	}
+	// }
 
-	if (exist) {
-		return;
-	}
+	// if (exist) {
+	// 	return;
+	// }
 
 	try {
 		let response = await fetcher.fetchHttpText(url);
@@ -107,6 +107,7 @@ export async function addToCache(url, type) {
 				type: type,
 				url: url,
 				content: response,
+				skipped: skipped,
 			})
 			.then((result) => {
 				return result;

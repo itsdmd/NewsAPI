@@ -18,6 +18,10 @@ const cacheSchema = new Schema({
 		immutable: true,
 		default: () => Date.now(),
 	},
+	skipped: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 export default model("cache", cacheSchema, "cache");

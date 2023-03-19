@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import jsdom from "jsdom";
 import mongoose from "mongoose";
 
+import * as cacher from "./cacher.js";
 import cacheModel from "../../models/cache.js";
 import * as transactor from "./transactor.js";
 
@@ -23,31 +24,14 @@ db.once("open", async () => {
 	console.log("[parser.js] Connected to Database");
 });
 
-export function querySelectorFrom(selector, elements) {
-	return [].filter.call(elements, function (element) {
-		return element.matches(selector);
-	});
-}
-
 export function htmlToJsdom(content) {
 	console.log("[parser.js:httpToJsdom]");
 
 	return new JSDOM(content).window.document;
 }
 
-export function parseDate(type, input) {
-	console.log("[parser.js:parseDate]");
-
-	switch (type) {
-		default: {
-			console.log("[parser.js:parseDate] Error: Invalid type");
-			return;
-		}
-	}
-}
-
 export async function parseJsdom(dom, mode) {
-	console.log("[parser.js:parseJsdom]");
+	// console.log("[parser.js:parseJsdom]");
 	try {
 		switch (mode) {
 			case "vnx-vn-article": {
@@ -387,14 +371,14 @@ export async function parseJsdom(dom, mode) {
 
 				// authors
 				let authors = [];
-				dom.getElementsByClassName("author-item-name")[0].children[0].getAttribute("title");
+				let authorNodes = dom.querySelectorAll(".author-item-name a.name");
 
-				for (let i = 0; i < dom.getElementsByClassName("author-item-name").length; i++) {
+				authorNodes.forEach((author) => {
 					authors.push({
-						title: dom.getElementsByClassName("author-item-name")[0].children[0].getAttribute("title"),
-						url: "https://tuoitre.vn" + dom.getElementsByClassName("author-item-name")[0].children[0].getAttribute("href"),
+						name: author.textContent,
+						url: author.getAttribute("href") === "javascript:;" ? "" : "https://tuoitre.vn" + author.getAttribute("href"),
 					});
-				}
+				});
 				// console.log("[parser.js:parseJsdom] Authors: " + JSON.stringify(authors));
 
 				/* #endregion */
@@ -517,12 +501,12 @@ export async function parseJsdom(dom, mode) {
 		}
 	} catch (error) {
 		console.log("[parser.js:parseJsdom] Error: " + error);
-		return;
+		throw error;
 	}
 }
 
 export async function parseCache(mode) {
-	console.log("[parser.js:parseCache]");
+	// console.log("[parser.js:parseCache]");
 
 	let numOfCachedDocs = await cacheModel.count();
 	console.log("[parser.js:parseCache] numOfCachedDocs: " + numOfCachedDocs);
@@ -530,31 +514,57 @@ export async function parseCache(mode) {
 	while (numOfCachedDocs > 0) {
 		// create new vnexpressArticle
 		try {
-			// fetch oldest doc in cacheSchema
-			const cachedDoc = await cacheModel
-				.findOne({})
-				.sort({ created_at: 1 })
-				.catch((err) => {
-					console.log("[parser.js:parseCache] Error when fetching oldest doc: " + err);
-					return;
-				});
+			// fetch doc in cacheSchema
+			const cachedDoc = await cacheModel.findOne({ skipped: false }).catch((err) => {
+				console.log("[parser.js:parseCache] Error when fetching doc: " + err);
+				return;
+			});
 
 			// parse cachedDoc
-			console.log("[parser.js:parseCache] Parsing cachedDoc: " + cachedDoc._id);
+			console.log("[parser.js:parseCache] Parsing: " + cachedDoc._id); //+ " (url: " + cachedDoc.url + ")");
 			const httpDoc = htmlToJsdom(cachedDoc.content);
 
 			switch (mode) {
 				case "vnx-vn": {
-					const parsedHttp = await parseJsdom(httpDoc, "vnx-vn-article").catch((err) => {
-						console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
-						return;
-					});
-					console.log("[parser.js:parseCache] Parsed successfully");
+					await parseJsdom(httpDoc, "tt-vn-article")
+						.then(async (parsedHttp) => {
+							console.log("[parser.js:parseCache] Parsed successfully");
 
-					await transactor
-						.addVnxVnArticle(parsedHttp)
-						.then(async () => {
-							// delete cachedDoc;
+							await transactor
+								.addTtVnArticle(parsedHttp)
+								.then(async () => {
+									// delete cachedDoc;
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										.catch((err) => {
+											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											return;
+										})
+										.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+									numOfCachedDocs--;
+								})
+								.catch(async (err) => {
+									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.catch(async (err) => {
+											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+
+											return;
+										});
+
+									numOfCachedDocs--;
+
+									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser.js:parseCache] Added back to cache");
+									});
+								});
+						})
+						.catch(async (err) => {
+							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
 								.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
@@ -563,63 +573,138 @@ export async function parseCache(mode) {
 									return;
 								});
 							numOfCachedDocs--;
-						})
-						.catch((err) => {
-							console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+							await cacher
+								.addToCache(cachedDoc.url, "tt-vn", true)
+								.then(() => {
+									console.log("[parser.js:parseCache] Added back to cache");
+								})
+								.then(async () => {
+									// delete cachedDoc;
+								});
+
+							return;
 						});
 
 					break;
 				}
 
 				case "vnx-en": {
-					const parsedHttp = await parseJsdom(httpDoc, "vnx-en-article").catch((err) => {
-						console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
-						return;
-					});
-					console.log("[parser.js:parseCache] Parsed successfully");
+					await parseJsdom(httpDoc, "tt-vn-article")
+						.then(async (parsedHttp) => {
+							console.log("[parser.js:parseCache] Parsed successfully");
 
-					await transactor
-						.addVnxEnArticle(parsedHttp)
-						.then(async () => {
-							// delete cachedDoc;
+							await transactor
+								.addTtVnArticle(parsedHttp)
+								.then(async () => {
+									// delete cachedDoc;
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										.catch((err) => {
+											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											return;
+										})
+										.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+									numOfCachedDocs--;
+								})
+								.catch(async (err) => {
+									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.catch(async (err) => {
+											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+
+											return;
+										});
+
+									numOfCachedDocs--;
+
+									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser.js:parseCache] Added back to cache");
+									});
+								});
+						})
+						.catch(async (err) => {
+							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
+								.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 								.catch((err) => {
 									console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
 									return;
-								})
-								.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+								});
 							numOfCachedDocs--;
-						})
-						.catch((err) => {
-							console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+							await cacher
+								.addToCache(cachedDoc.url, "tt-vn", true)
+								.then(() => {
+									console.log("[parser.js:parseCache] Added back to cache");
+								})
+								.then(async () => {
+									// delete cachedDoc;
+								});
+
+							return;
 						});
 
 					break;
 				}
 
 				case "tt-vn": {
-					const parsedHttp = await parseJsdom(httpDoc, "tt-vn-article").catch((err) => {
-						console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
-						return;
-					});
-					console.log("[parser.js:parseCache] Parsed successfully");
+					await parseJsdom(httpDoc, "tt-vn-article")
+						.then(async (parsedHttp) => {
+							// console.log("[parser.js:parseCache] Parsed successfully");
 
-					await transactor
-						.addTtVnArticle(parsedHttp)
-						.then(async () => {
-							// delete cachedDoc;
+							await transactor
+								.addTtVnArticle(parsedHttp)
+								.then(async () => {
+									// delete cachedDoc;
+									await cacheModel.deleteOne({ _id: cachedDoc._id }).catch((err) => {
+										console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+										return;
+									});
+									// .finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+									numOfCachedDocs--;
+								})
+								.catch(async (err) => {
+									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										// .then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.catch(async (err) => {
+											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+
+											return;
+										});
+
+									numOfCachedDocs--;
+
+									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser.js:parseCache] Added back to cache");
+									});
+								});
+						})
+						.catch(async (err) => {
+							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
+								// .then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 								.catch((err) => {
 									console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
 									return;
-								})
-								.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+								});
 							numOfCachedDocs--;
-						})
-						.catch((err) => {
-							console.log("[parser.js:parseCache] Error when call transactor: " + err);
+
+							await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
+								console.log("[parser.js:parseCache] Added back to cache");
+							});
+
+							return;
 						});
 
 					break;

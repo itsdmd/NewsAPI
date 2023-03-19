@@ -48,11 +48,11 @@ export async function addVnxEnArticle(article) {
 }
 
 export async function addTtVnArticle(article) {
-	console.log("[transactor.js:addTtVnArticle]");
+	// console.log("[transactor.js:addTtVnArticle]");
 
 	try {
 		await ttVnModel.create(article).then((result) => {
-			console.log("[transactor.js:addTtVnArticle] Success. ID: " + result._id);
+			// console.log("[transactor.js:addTtVnArticle] Success. ID: " + result._id);
 		});
 		return;
 	} catch (error) {

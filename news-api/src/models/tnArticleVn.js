@@ -55,7 +55,7 @@ const tnVnArticleSchema = new Schema({
 			},
 		],
 	},
-	content_blocks: [
+	content: [
 		{
 			tag: {
 				type: String,

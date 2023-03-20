@@ -31,3 +31,15 @@ GET https://tuoitre.vn/quoc-hoi-my-chia-re-vu-cam-tiktok-20230301121811715.htm
 ###
 
 GET https://tuoitre.vn/thanh-thep-roi-lam-3-nguoi-di-vien-cong-truong-lap-luoi-an-toan-nhung-ho-hung-nhu-khong-20230314224150754.htm
+
+###
+
+GET https://tuoitrenews.vn/page?slug=ttn-politics&ajax=13---ttnews_custom_list&page_number=2
+
+###
+
+GET https://tuoitrenews.vn/page?slug=ttn-business&ajax=13---ttnews_custom_list&page_number=1
+
+###
+
+GET https://thanhnien.vn/timelinelist/1854/1.htm

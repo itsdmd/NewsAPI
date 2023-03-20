@@ -3,7 +3,7 @@ console.log("[fetcher.js]");
 
 export async function fetchHttpText(url) {
 	if (url === undefined || url === null || url === "") {
-		console.log("[fetcher.js:fetch] Error: url is undefined or null.");
+		console.log("[fetcher:fetch] Error: url is undefined or null.");
 
 		throw new Error("url is undefined or null.");
 	}
@@ -11,15 +11,15 @@ export async function fetchHttpText(url) {
 	// remove all after .html
 	url = url.replace(/.html.*/, ".html");
 
-	console.log("[fetcher.js:fetch] Fetching " + url);
+	// console.log("[fetcher:fetch] Fetching " + url);
 
 	return await fetch(url)
 		.then((response) => {
-			console.log("[fetcher.js:fetch] Success.");
+			// console.log("[fetcher:fetch] Success.");
 			return response.text();
 		})
 		.catch((error) => {
-			console.log("[fetcher.js:fetch] Error: " + error.message);
+			console.log("[fetcher:fetch] Error: " + error.message);
 			return;
 		});
 }

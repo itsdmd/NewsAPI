@@ -12,13 +12,13 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 		limit = 5000;
 	}
 
-	console.log("[scraper.js:scrape] mode: " + mode + ", url: " + startUrl + ", limit: " + limit);
+	console.log("[scraper:scrape] mode: " + mode + ", url: " + startUrl + ", limit: " + limit);
 
 	switch (mode) {
 		case "vnx-vn": {
 			let i = limit;
 			while (i !== 0) {
-				console.log("[scraper.js:scrape] Feed: " + startUrl);
+				console.log("[scraper:scrape] Feed: " + startUrl);
 
 				if (startUrl === baseUrl + "undefined") {
 					break;
@@ -32,9 +32,9 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					let urls = await parser.parseJsdom(html, "vnx-vn-feed");
 
 					try {
-						await cacher.cache(urls, "vnx-vn");
+						await cacher.cacheMany(urls, "vnx-vn");
 					} catch (error) {
-						console.log("[scraper.js:scrape] Error: " + error.message);
+						console.log("[scraper:scrape] Error: " + error.message);
 						return;
 					}
 
@@ -43,7 +43,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 					i--;
 				} catch (error) {
-					console.log("[scraper.js:scrape] Error: " + error.message);
+					console.log("[scraper:scrape] Error: " + error.message);
 					return;
 				}
 			}
@@ -59,7 +59,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 				// https://e.vnexpress.net/category/listcategory/category_id/1003895/page/1
 				// ctg:
 				// 		1003894:news
-				// 		1003895:business
+				// 		1003895:businessorld
 
 				let html = await fetcher.fetchHttpText(startUrl);
 
@@ -75,13 +75,13 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					// replace \/ with /
 					html = html.replace(/\\\//g, "/");
 
-					// console.log("[scraper.js:scrape] HTML: " + html);
+					// console.log("[scraper:scrape] HTML: " + html);
 
 					let urls = await parser.parseJsdom(parser.htmlToJsdom(html), "vnx-en-feed");
 					try {
-						await cacher.cache(urls, "vnx-en");
+						await cacher.cacheMany(urls, "vnx-en");
 					} catch (error) {
-						console.log("[scraper.js:scrape] Error: " + error.message);
+						console.log("[scraper:scrape] Error: " + error.message);
 						return;
 					}
 
@@ -90,7 +90,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 					i--;
 				} catch (error) {
-					console.log("[scraper.js:scrape] Error: " + error.message);
+					console.log("[scraper:scrape] Error: " + error.message);
 					return;
 				}
 			}
@@ -102,21 +102,14 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 			let i = limit;
 
 			while (i !== 0) {
-				// https://tuoitre.vn/timeline/3/trang-1.htm
-				// https://tuoitre.vn/timeline/3/trang-10.htm
-				// https://tuoitre.vn/timeline/3/trang-100.htm
-				// timeline:
-				// 		3:news
-				// 		11:business
-
 				try {
 					let html = await fetcher.fetchHttpText(startUrl);
 
 					let urls = await parser.parseJsdom(parser.htmlToJsdom(html), "tt-vn-feed");
 					try {
-						await cacher.cache(urls, "tt-vn");
+						await cacher.cacheMany(urls, "tt-vn");
 					} catch (error) {
-						console.log("[scraper.js:scrape] Error: " + error.message);
+						console.log("[scraper:scrape] Error: " + error.message);
 						return;
 					}
 
@@ -127,7 +120,39 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 					i--;
 				} catch (error) {
-					console.log("[scraper.js:scrape] Error: " + error.message);
+					console.log("[scraper:scrape] Error: " + error.message);
+					return;
+				}
+			}
+
+			return;
+		}
+
+		case "tn-vn": {
+			let i = limit;
+
+			while (i !== 0) {
+				try {
+					let html = await fetcher.fetchHttpText(startUrl);
+
+					let urls = await parser.parseJsdom(parser.htmlToJsdom(html), "tn-vn-feed");
+					try {
+						await cacher.cacheMany(urls, "tn-vn", false);
+					} catch (error) {
+						console.log("[scraper:scrape] Error: " + error.message);
+						return;
+					}
+
+					// https://thanhnien.vn/timelinelist/1854/1.htm
+
+					// page number between the last / and before .htm
+					let page = parseInt(startUrl.substring(startUrl.lastIndexOf("/") + 1, startUrl.lastIndexOf(".htm")));
+					page++;
+					startUrl = baseUrl + page.toString() + ".htm";
+
+					i--;
+				} catch (error) {
+					console.log("[scraper:scrape] Error: " + error.message);
 					return;
 				}
 			}
@@ -136,7 +161,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 		}
 
 		default: {
-			console.log("[scraper.js:scrape] Error: Invalid mode");
+			console.log("[scraper:scrape] Error: Invalid mode");
 			break;
 		}
 	}

@@ -25,13 +25,13 @@ db.once("open", async () => {
 });
 
 export function htmlToJsdom(content) {
-	console.log("[parser.js:httpToJsdom]");
+	// console.log("[parser:httpToJsdom]");
 
 	return new JSDOM(content).window.document;
 }
 
 export async function parseJsdom(dom, mode) {
-	// console.log("[parser.js:parseJsdom]");
+	// console.log("[parser:parseJsdom]");
 	try {
 		switch (mode) {
 			case "vnx-vn-article": {
@@ -39,7 +39,7 @@ export async function parseJsdom(dom, mode) {
 				/* #region   */
 				// id
 				const id = dom.querySelector("meta[name*='tt_article_id']").getAttribute("content");
-				console.log("[parser.js:parseJsdom] ID: " + id);
+				console.log("[parser:parseJsdom] ID: " + id);
 
 				// url
 				const url = dom.querySelector("meta[name='its_url']").getAttribute("content");
@@ -59,26 +59,26 @@ export async function parseJsdom(dom, mode) {
 				// keywords
 				let keywords = dom.querySelector("meta[name*='keywords']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] keywords: " + keywords);
+					// console.log("[parser:parseJsdom] keywords: " + keywords);
 					keywords = keywords.split(", ");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing keywords: " + error);
+					console.log("[parser:parseJsdom] Error parsing keywords: " + error);
 				}
 
 				// folders
 				let folderIds = dom.querySelector("meta[name*='tt_list_folder']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] folderIds: " + folderIds);
+					// console.log("[parser:parseJsdom] folderIds: " + folderIds);
 					folderIds = folderIds.split(",");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing folders: " + error);
+					console.log("[parser:parseJsdom] Error parsing folders: " + error);
 				}
 				let folderNames = dom.querySelector("meta[name*='tt_list_folder_name']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] folderNames: " + folderNames);
+					// console.log("[parser:parseJsdom] folderNames: " + folderNames);
 					folderNames = folderNames.split(",");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing folder names: " + error);
+					console.log("[parser:parseJsdom] Error parsing folder names: " + error);
 				}
 				let folders = [];
 				for (let i = 0; i < folderIds.length; i++) {
@@ -88,7 +88,7 @@ export async function parseJsdom(dom, mode) {
 							name: folderNames[i],
 						});
 					} catch (error) {
-						console.log("[parser.js:parseJsdom] Error parsing folders: " + error);
+						console.log("[parser:parseJsdom] Error parsing folders: " + error);
 						break;
 					}
 				}
@@ -108,10 +108,10 @@ export async function parseJsdom(dom, mode) {
 				// authors
 				let authors = dom.querySelector("strong").textContent;
 				try {
-					// console.log("[parser.js:parseJsdom] Authors: " + authors);
+					// console.log("[parser:parseJsdom] Authors: " + authors);
 					authors = authors.split(" - ");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing authors: " + error);
+					console.log("[parser:parseJsdom] Error parsing authors: " + error);
 				}
 				/* #endregion */
 
@@ -149,7 +149,7 @@ export async function parseJsdom(dom, mode) {
 					content_blocks: content_blocks,
 				};
 
-				console.log("[parser.js:parseJsdom] vnxVnArticle: " + JSON.stringify(vnxVnArticle));
+				console.log("[parser:parseJsdom] vnxVnArticle: " + JSON.stringify(vnxVnArticle));
 				return vnxVnArticle;
 			}
 
@@ -158,7 +158,7 @@ export async function parseJsdom(dom, mode) {
 				/* #region   */
 				// id
 				const id = dom.querySelector("meta[name*='tt_article_id']").getAttribute("content");
-				console.log("[parser.js:parseJsdom] ID: " + id);
+				console.log("[parser:parseJsdom] ID: " + id);
 
 				// url
 				const url = dom.querySelector("meta[name='its_url']").getAttribute("content");
@@ -178,26 +178,26 @@ export async function parseJsdom(dom, mode) {
 				// keywords
 				let keywords = dom.querySelector("meta[name*='keywords']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] keywords: " + keywords);
+					// console.log("[parser:parseJsdom] keywords: " + keywords);
 					keywords = keywords.split(", ");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing keywords: " + error);
+					console.log("[parser:parseJsdom] Error parsing keywords: " + error);
 				}
 
 				// folders
 				let folderIds = dom.querySelector("meta[name*='tt_list_folder']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] folderIds: " + folderIds);
+					// console.log("[parser:parseJsdom] folderIds: " + folderIds);
 					folderIds = folderIds.split(",");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing folders: " + error);
+					console.log("[parser:parseJsdom] Error parsing folders: " + error);
 				}
 				let folderNames = dom.querySelector("meta[name*='tt_list_folder_name']").getAttribute("content");
 				try {
-					// console.log("[parser.js:parseJsdom] folderNames: " + folderNames);
+					// console.log("[parser:parseJsdom] folderNames: " + folderNames);
 					folderNames = folderNames.split(",");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing folder names: " + error);
+					console.log("[parser:parseJsdom] Error parsing folder names: " + error);
 				}
 				let folders = [];
 				for (let i = 0; i < folderIds.length; i++) {
@@ -207,7 +207,7 @@ export async function parseJsdom(dom, mode) {
 							name: folderNames[i],
 						});
 					} catch (error) {
-						console.log("[parser.js:parseJsdom] Error parsing folders: " + error);
+						console.log("[parser:parseJsdom] Error parsing folders: " + error);
 						break;
 					}
 				}
@@ -237,10 +237,10 @@ export async function parseJsdom(dom, mode) {
 				// authors
 				let authors = dom.querySelector(".author a").textContent;
 				try {
-					// console.log("[parser.js:parseJsdom] Authors: " + authors);
+					// console.log("[parser:parseJsdom] Authors: " + authors);
 					authors = authors.split(", ");
 				} catch (error) {
-					console.log("[parser.js:parseJsdom] Error parsing authors: " + error);
+					console.log("[parser:parseJsdom] Error parsing authors: " + error);
 				}
 				/* #endregion */
 
@@ -278,7 +278,7 @@ export async function parseJsdom(dom, mode) {
 					content_blocks: content_blocks,
 				};
 
-				console.log("[parser.js:parseJsdom] vnxEnArticle: " + JSON.stringify(vnxEnArticle));
+				console.log("[parser:parseJsdom] vnxEnArticle: " + JSON.stringify(vnxEnArticle));
 				return vnxEnArticle;
 			}
 
@@ -296,7 +296,7 @@ export async function parseJsdom(dom, mode) {
 						}
 					}
 
-					console.log("[parser.js:parseJsdom] " + item.getAttribute("href"));
+					console.log("[parser:parseJsdom] " + item.getAttribute("href"));
 					urls.push(item.getAttribute("href"));
 				});
 
@@ -309,11 +309,15 @@ export async function parseJsdom(dom, mode) {
 				let newsItems = dom.querySelectorAll("div.item_news .title_news_site a");
 
 				newsItems.forEach((item) => {
-					console.log("[parser.js:parseJsdom] " + item.getAttribute("href"));
+					console.log("[parser:parseJsdom] " + item.getAttribute("href"));
 					urls.push(item.getAttribute("href"));
 				});
 
 				return urls;
+			}
+
+			case "vnx-vn-next-page": {
+				return dom.querySelector("a.btn-page.next-page").getAttribute("href");
 			}
 
 			case "tt-vn-article": {
@@ -321,23 +325,23 @@ export async function parseJsdom(dom, mode) {
 				/* #region   */
 				// id
 				const id = dom.querySelector("#hidNewsId").getAttribute("value");
-				// console.log("[parser.js:parseJsdom] ID: " + id);
+				// console.log("[parser:parseJsdom] ID: " + id);
 
 				// url
 				const url = dom.querySelector("#hidNewsUrl").getAttribute("value");
-				// console.log("[parser.js:parseJsdom] URL: " + url);
+				// console.log("[parser:parseJsdom] URL: " + url);
 
 				// category
 				const category = dom.querySelector("div.detail-cate a").textContent;
-				// console.log("[parser.js:parseJsdom] Category: " + category);
+				// console.log("[parser:parseJsdom] Category: " + category);
 
 				// title
 				const title = dom.querySelector("h1.detail-title").textContent;
-				// console.log("[parser.js:parseJsdom] Title: " + title);
+				// console.log("[parser:parseJsdom] Title: " + title);
 
 				// description
 				const description = dom.querySelector("h2.detail-sapo").textContent;
-				// console.log("[parser.js:parseJsdom] Description: " + description);
+				// console.log("[parser:parseJsdom] Description: " + description);
 
 				// tags
 				let tagNodes = dom.querySelectorAll("div.detail-tab > a");
@@ -350,7 +354,7 @@ export async function parseJsdom(dom, mode) {
 						url: "https://tuoitre.vn" + tag.getAttribute("href"),
 					});
 				});
-				// console.log("[parser.js:parseJsdom] Tags: " + JSON.stringify(tags));
+				// console.log("[parser:parseJsdom] Tags: " + JSON.stringify(tags));
 
 				// publish_date
 				// 18/03/2023 18:37 GMT+7
@@ -367,7 +371,7 @@ export async function parseJsdom(dom, mode) {
 					":" +
 					rawDate.substring(14, 16) +
 					":00+07:00";
-				// console.log("[parser.js:parseJsdom] Publish date: " + publish_date);
+				// console.log("[parser:parseJsdom] Publish date: " + publish_date);
 
 				// authors
 				let authors = [];
@@ -379,7 +383,7 @@ export async function parseJsdom(dom, mode) {
 						url: author.getAttribute("href") === "javascript:;" ? "" : "https://tuoitre.vn" + author.getAttribute("href"),
 					});
 				});
-				// console.log("[parser.js:parseJsdom] Authors: " + JSON.stringify(authors));
+				// console.log("[parser:parseJsdom] Authors: " + JSON.stringify(authors));
 
 				/* #endregion */
 
@@ -437,7 +441,7 @@ export async function parseJsdom(dom, mode) {
 							if (childNode.getAttribute("type") === "VideoStream") {
 								attributes.src = "https://tuoitre.vn" + childNode.getAttribute("data-vid");
 								attributes.thumbnail = childNode.getAttribute("data-thumb");
-								attributes.caption = childNode.childNode[1].childNode[1].textContent;
+								attributes.caption = childNode.childNodes[1].textContent;
 							}
 
 							break;
@@ -470,7 +474,7 @@ export async function parseJsdom(dom, mode) {
 					content_blocks: content_blocks,
 				};
 
-				// console.log("[parser.js:parseJsdom] ttVnArticle: " + JSON.stringify(ttVnArticle));
+				// console.log("[parser:parseJsdom] ttVnArticle: " + JSON.stringify(ttVnArticle));
 				return ttVnArticle;
 			}
 
@@ -488,47 +492,54 @@ export async function parseJsdom(dom, mode) {
 			}
 
 			case "tt-en-feed": {
+				let urls = [];
 			}
 
-			case "vnx-vn-next-page": {
-				return dom.querySelector("a.btn-page.next-page").getAttribute("href");
+			case "tn-vn-feed": {
+				let urls = [];
+
+				dom.querySelectorAll("a.box-category-link-title").forEach((node) => {
+					urls.push("https://thanhnien.vn" + node.getAttribute("href"));
+				});
+
+				return urls;
 			}
 
 			default: {
-				console.log("[parser.js:parseJsdom] Unknown mode: " + mode);
+				console.log("[parser:parseJsdom] Unknown mode: " + mode);
 				break;
 			}
 		}
 	} catch (error) {
-		console.log("[parser.js:parseJsdom] Error: " + error);
+		console.log("[parser:parseJsdom] Error: " + error);
 		throw error;
 	}
 }
 
 export async function parseCache(mode) {
-	// console.log("[parser.js:parseCache]");
+	// console.log("[parser:parseCache]");
 
 	let numOfCachedDocs = await cacheModel.count();
-	console.log("[parser.js:parseCache] numOfCachedDocs: " + numOfCachedDocs);
+	console.log("[parser:parseCache] numOfCachedDocs: " + numOfCachedDocs);
 
 	while (numOfCachedDocs > 0) {
 		// create new vnexpressArticle
 		try {
 			// fetch doc in cacheSchema
 			const cachedDoc = await cacheModel.findOne({ skipped: false }).catch((err) => {
-				console.log("[parser.js:parseCache] Error when fetching doc: " + err);
+				console.log("[parser:parseCache] Error when fetching doc: " + err);
 				return;
 			});
 
 			// parse cachedDoc
-			console.log("[parser.js:parseCache] Parsing: " + cachedDoc._id); //+ " (url: " + cachedDoc.url + ")");
+			// console.log("[parser:parseCache] Parsing: " + cachedDoc._id); //+ " (url: " + cachedDoc.url + ")");
 			const httpDoc = htmlToJsdom(cachedDoc.content);
 
 			switch (mode) {
 				case "vnx-vn": {
 					await parseJsdom(httpDoc, "tt-vn-article")
 						.then(async (parsedHttp) => {
-							console.log("[parser.js:parseCache] Parsed successfully");
+							console.log("[parser:parseCache] Parsed successfully");
 
 							await transactor
 								.addTtVnArticle(parsedHttp)
@@ -537,47 +548,47 @@ export async function parseCache(mode) {
 									await cacheModel
 										.deleteOne({ _id: cachedDoc._id })
 										.catch((err) => {
-											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 											return;
 										})
-										.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+										.finally(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id));
 									numOfCachedDocs--;
 								})
 								.catch(async (err) => {
-									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+									console.log("[parser:parseCache] Error when call transactor: " + err);
 
 									await cacheModel
 										.deleteOne({ _id: cachedDoc._id })
-										.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 										.catch(async (err) => {
-											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 
 											return;
 										});
 
 									numOfCachedDocs--;
 
-									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
-										console.log("[parser.js:parseCache] Added back to cache");
+									await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser:parseCache] Added back to cache");
 									});
 								});
 						})
 						.catch(async (err) => {
-							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+							console.log("[parser:parseCache] Error when parsing cachedDoc: " + err);
 
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
-								.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+								.then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 								.catch((err) => {
-									console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+									console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 									return;
 								});
 							numOfCachedDocs--;
 
 							await cacher
-								.addToCache(cachedDoc.url, "tt-vn", true)
+								.cacheOne(cachedDoc.url, "tt-vn", true)
 								.then(() => {
-									console.log("[parser.js:parseCache] Added back to cache");
+									console.log("[parser:parseCache] Added back to cache");
 								})
 								.then(async () => {
 									// delete cachedDoc;
@@ -592,7 +603,7 @@ export async function parseCache(mode) {
 				case "vnx-en": {
 					await parseJsdom(httpDoc, "tt-vn-article")
 						.then(async (parsedHttp) => {
-							console.log("[parser.js:parseCache] Parsed successfully");
+							console.log("[parser:parseCache] Parsed successfully");
 
 							await transactor
 								.addTtVnArticle(parsedHttp)
@@ -601,47 +612,47 @@ export async function parseCache(mode) {
 									await cacheModel
 										.deleteOne({ _id: cachedDoc._id })
 										.catch((err) => {
-											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 											return;
 										})
-										.finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+										.finally(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id));
 									numOfCachedDocs--;
 								})
 								.catch(async (err) => {
-									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+									console.log("[parser:parseCache] Error when call transactor: " + err);
 
 									await cacheModel
 										.deleteOne({ _id: cachedDoc._id })
-										.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 										.catch(async (err) => {
-											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 
 											return;
 										});
 
 									numOfCachedDocs--;
 
-									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
-										console.log("[parser.js:parseCache] Added back to cache");
+									await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser:parseCache] Added back to cache");
 									});
 								});
 						})
 						.catch(async (err) => {
-							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+							console.log("[parser:parseCache] Error when parsing cachedDoc: " + err);
 
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
-								.then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+								.then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 								.catch((err) => {
-									console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+									console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 									return;
 								});
 							numOfCachedDocs--;
 
 							await cacher
-								.addToCache(cachedDoc.url, "tt-vn", true)
+								.cacheOne(cachedDoc.url, "tt-vn", true)
 								.then(() => {
-									console.log("[parser.js:parseCache] Added back to cache");
+									console.log("[parser:parseCache] Added back to cache");
 								})
 								.then(async () => {
 									// delete cachedDoc;
@@ -656,52 +667,52 @@ export async function parseCache(mode) {
 				case "tt-vn": {
 					await parseJsdom(httpDoc, "tt-vn-article")
 						.then(async (parsedHttp) => {
-							// console.log("[parser.js:parseCache] Parsed successfully");
+							// console.log("[parser:parseCache] Parsed successfully");
 
 							await transactor
 								.addTtVnArticle(parsedHttp)
 								.then(async () => {
 									// delete cachedDoc;
 									await cacheModel.deleteOne({ _id: cachedDoc._id }).catch((err) => {
-										console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+										console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 										return;
 									});
-									// .finally(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+									// .finally(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id));
 									numOfCachedDocs--;
 								})
 								.catch(async (err) => {
-									console.log("[parser.js:parseCache] Error when call transactor: " + err);
+									console.log("[parser:parseCache] Error when call transactor: " + err);
 
 									await cacheModel
 										.deleteOne({ _id: cachedDoc._id })
-										// .then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										// .then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 										.catch(async (err) => {
-											console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+											console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 
 											return;
 										});
 
 									numOfCachedDocs--;
 
-									await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
-										console.log("[parser.js:parseCache] Added back to cache");
+									await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+										console.log("[parser:parseCache] Added back to cache");
 									});
 								});
 						})
 						.catch(async (err) => {
-							console.log("[parser.js:parseCache] Error when parsing cachedDoc: " + err);
+							console.log("[parser:parseCache] Error when parsing cachedDoc: " + err);
 
 							await cacheModel
 								.deleteOne({ _id: cachedDoc._id })
-								// .then(console.log("[parser.js:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+								// .then(console.log("[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
 								.catch((err) => {
-									console.log("[parser.js:parseCache] Error when deleting cachedDoc: " + err);
+									console.log("[parser:parseCache] Error when deleting cachedDoc: " + err);
 									return;
 								});
 							numOfCachedDocs--;
 
-							await cacher.addToCache(cachedDoc.url, "tt-vn", true).then(() => {
-								console.log("[parser.js:parseCache] Added back to cache");
+							await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+								console.log("[parser:parseCache] Added back to cache");
 							});
 
 							return;
@@ -713,7 +724,7 @@ export async function parseCache(mode) {
 
 			continue;
 		} catch (err) {
-			console.log("[parser.js:parseCache] Error: " + err);
+			console.log("[parser:parseCache] Error: " + err);
 			return;
 		}
 	}

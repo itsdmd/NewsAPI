@@ -17,33 +17,35 @@ app.use(express.json());
 app.use("/date", dateRouter);
 
 app.listen(port, () => {
-	console.log("[server.js:main] Listening on port " + port);
+	console.log("[server:main] Listening on port " + port);
 });
 
 async function main(mode, baseUrl, startUrl, limit = 1) {
-	console.log("[server.js:main]");
+	console.log("[server:main]");
+
+	// https://tuoitre.vn/timeline/3/trang-10.htm
+	// timeline:
+	// 		3:news
+	// 		11:business
+	// 		200029:tech
 
 	/* ------------ scraping ------------ */
-	await scraper
-		.scrape(mode, baseUrl, startUrl, limit)
-		.catch((error) => {
-			console.log("[server.js:main] Error: " + error.message);
-		})
-		.finally(async () => {
-			console.log("[server.js:main] Done scraping");
+	await scraper.scrape(mode, baseUrl, startUrl, limit).catch((error) => {
+		console.log("[server:main] Error: " + error.message);
+		// })
+		// .finally(async () => {
+		// 	console.log("[server:main] Done scraping");
 
-			/* ------------ parsing ------------ */
-			await parser.parseCache(mode).finally(() => {
-				console.log("[server.js:main] Done parsing");
-			});
-		});
+		// 	/* ------------ parsing ------------ */
+		// 	await parser.parseCache(mode).finally(() => {
+		// 		console.log("[server:main] Done parsing");
+		// 	});
+	});
 }
 
 // import * as cacher from "./scripts/scraper/cacher.js";
 async function test() {
-	await parser.parseCache("tt-vn").finally(() => {
-		console.log("[server.js:main] Done parsing");
-	});
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 10500);
 }
 
 await test();
@@ -58,5 +60,3 @@ await test();
 // 	"https://e.vnexpress.net/category/listcategory/category_id/1003895/page/1",
 // 	-1
 // );
-
-// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-5.htm", -1);

@@ -144,13 +144,13 @@ export async function parseDom(dom, mode) {
 
 				/* ------------- content ------------ */
 				/* #region   */
-				// content_blocks
-				let content_blocks = [];
+				// content
+				let content = [];
 
 				// audio
 				let audioplayer = dom.querySelector("div.audioplayer");
 				if (audioplayer !== null && audioplayer !== undefined) {
-					content_blocks.push({
+					content.push({
 						tag: audioplayer.tagName,
 						content: "audioplayer",
 						attributes: {
@@ -179,9 +179,14 @@ export async function parseDom(dom, mode) {
 												content: childNode.childNodes[j].textContent,
 												href: childNode.childNodes[j].getAttribute("href"),
 											};
+										} catch (e) {
+											console.log("[parser:parseDom] Error parsing content/A");
+										}
+
+										try {
 											attributes.push(attr);
 										} catch (e) {
-											console.log("[parser:parseDom] Error parsing content_blocks/A: " + e);
+											console.log("[parser:parseDom] Error parsing content/A/push");
 										}
 									}
 								}
@@ -194,13 +199,28 @@ export async function parseDom(dom, mode) {
 						case "FIGURE": {
 							if (childNode.getAttribute("type") === "Photo") {
 								try {
-									attr = {
-										src: childNode.childNodes[0].childNodes[0].getAttribute("src"),
-										caption: childNode.childNodes[1].childNodes[0].textContent,
-									};
+									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+
+									// the author is inside the caption
+									// Example: Caption goes here - Ảnh: PHẠM TUẤN -> author name is "PHẠM TUẤN"
+
+									const caption = childNode.childNodes[1].childNodes[0].textContent;
+
+									attr.caption = caption.slice(0, caption.lastIndexOf("-")).trim();
+									attr.author = caption
+										.slice(caption.lastIndexOf("-") + 1)
+										.split(":")
+										.slice(1)
+										.join(" ")
+										.trim();
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/FIGURE/attr");
+								}
+
+								try {
 									attributes.push(attr);
 								} catch (e) {
-									console.log("[parser:parseDom] Error parsing content_blocks/FIGURE: " + e);
+									console.log("[parser:parseDom] Error parsing content/FIGURE/push");
 								}
 							}
 
@@ -216,9 +236,14 @@ export async function parseDom(dom, mode) {
 										thumbnail: childNode.getAttribute("data-thumb"),
 										caption: childNode.childNodes[0].childNodes[0].textContent,
 									};
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/DIV/attr");
+								}
+
+								try {
 									attributes.push(attr);
 								} catch (e) {
-									console.log("[parser:parseDom] Error parsing content_blocks/DIV: " + e);
+									console.log("[parser:parseDom] Error parsing content/DIV/push");
 								}
 							}
 
@@ -226,25 +251,29 @@ export async function parseDom(dom, mode) {
 						}
 
 						default:
-							break;
+							continue;
 					}
 
-					if (childNode.tagName === "FIGURE") {
-						content_blocks.push({
-							tag: childNode.tagName,
-							attributes: attributes,
-						});
-					} else if (attributes.length === 0) {
-						content_blocks.push({
-							tag: childNode.tagName,
-							content: childNode.textContent,
-						});
-					} else {
-						content_blocks.push({
-							tag: childNode.tagName,
-							content: childNode.textContent,
-							attributes: attributes,
-						});
+					try {
+						if (childNode.tagName === "FIGURE") {
+							content.push({
+								tag: childNode.tagName,
+								attributes: attributes,
+							});
+						} else if (attributes.length === 0) {
+							content.push({
+								tag: childNode.tagName,
+								content: childNode.textContent,
+							});
+						} else {
+							content.push({
+								tag: childNode.tagName,
+								content: childNode.textContent,
+								attributes: attributes,
+							});
+						}
+					} catch (e) {
+						console.log("[parser:parseDom] Error pushing to content: " + e);
 					}
 				}
 				/* #endregion */
@@ -261,7 +290,7 @@ export async function parseDom(dom, mode) {
 						publish_date: publish_date,
 						authors: authors,
 					},
-					content_blocks: content_blocks,
+					content: content,
 				};
 
 				// console.log("[parser:parseDom] ttVnArticle: " + JSON.stringify(ttVnArticle));
@@ -382,13 +411,14 @@ export async function parseDom(dom, mode) {
 				/* #endregion */
 
 				/* ------------- content ------------ */
-				// content_blocks
+				// content
 
-				let content_blocks = [];
+				let content = [];
 				let contentContainer = dom.querySelector("div.detail-content");
 
 				for (let i = 1; i < contentContainer.childElementCount; i++) {
-					let attributes = null;
+					let attributes = [];
+					let attr = {};
 
 					let childNode = contentContainer.childNodes[i];
 
@@ -400,38 +430,26 @@ export async function parseDom(dom, mode) {
 								break;
 							}
 
-							attributes = [];
-
 							if (childNode.childElementCount) {
 								for (let j = 0; j < childNode.childElementCount; j++) {
 									if (childNode.childNodes[j].tagName === "A") {
-										let attr = {};
 										try {
 											attr = {
 												tag: childNode.childNodes[j].tagName,
 												content: childNode.childNodes[j].textContent,
 												href: "https://thanhnien.vn" + childNode.childNodes[j].getAttribute("href"),
 											};
+										} catch (e) {
+											console.log("[parser:parseDom] content/A/attr");
+										}
 
+										try {
 											attributes.push(attr);
 										} catch (e) {
-											console.log("[parser:parseDom] content_blocks/A: " + e);
+											console.log("[parser:parseDom] content/A/push");
 										}
 									}
 								}
-							}
-
-							if (attributes.length === 0) {
-								content_blocks.push({
-									tag: childNode.tagName,
-									content: childNode.textContent,
-								});
-							} else {
-								content_blocks.push({
-									tag: childNode.tagName,
-									content: childNode.textContent,
-									attributes: { links: attributes },
-								});
 							}
 
 							break;
@@ -440,32 +458,30 @@ export async function parseDom(dom, mode) {
 						// photo
 						case "FIGURE": {
 							if (childNode.getAttribute("type") === "Photo") {
-								attributes = {};
-
 								try {
-									attributes.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
 								} catch (e) {
-									console.log("[parser:parseDom] content_blocks/FIGURE/src missing");
+									console.log("[parser:parseDom] content/FIGURE/caption missing");
 								}
 
 								try {
-									attributes.caption = childNode.childNodes[1].childNodes[0].textContent;
+									attr.caption = childNode.childNodes[1].childNodes[0].textContent;
 								} catch (e) {
-									console.log("[parser:parseDom] content_blocks/FIGURE/caption missing");
+									console.log("[parser:parseDom] content/FIGURE/caption missing");
 								}
 
 								try {
-									attributes.author = childNode.childNodes[2].childNodes[0].textContent;
+									attr.author = childNode.childNodes[2].childNodes[0].textContent;
 								} catch (e) {
-									console.log("[parser:parseDom] content_blocks/FIGURE/author missing");
+									console.log("[parser:parseDom] content/FIGURE/author missing");
+								}
+
+								try {
+									attributes.push(attr);
+								} catch (e) {
+									console.log("[parser:parseDom] content/FIGURE/push");
 								}
 							}
-
-							content_blocks.push({
-								tag: childNode.tagName,
-								content: childNode.textContent,
-								attributes: attributes,
-							});
 
 							break;
 						}
@@ -473,7 +489,29 @@ export async function parseDom(dom, mode) {
 						// videos seems very rare within articles (they have a dedicated category)
 
 						default:
-							break;
+							continue;
+					}
+
+					try {
+						if (childNode.tagName === "FIGURE") {
+							content.push({
+								tag: childNode.tagName,
+								attributes: attributes,
+							});
+						} else if (attr.length === 0) {
+							content.push({
+								tag: childNode.tagName,
+								content: childNode.textContent,
+							});
+						} else {
+							content.push({
+								tag: childNode.tagName,
+								content: childNode.textContent,
+								attributes: attr,
+							});
+						}
+					} catch (e) {
+						console.log("[parser:parseDom] Error pushing to content: " + e);
 					}
 				}
 
@@ -491,7 +529,7 @@ export async function parseDom(dom, mode) {
 						publish_date: publish_date,
 						authors: authors,
 					},
-					content_blocks: content_blocks,
+					content: content,
 				};
 
 				// console.log("[parser:parseDom] tnVnArticle: " + JSON.stringify(TnVnArticle));

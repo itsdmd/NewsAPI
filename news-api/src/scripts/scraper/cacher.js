@@ -23,8 +23,10 @@ db.once("open", async () => {
 	console.log("[cacher.js] Connected to Database");
 });
 
+import cliProgress from "cli-progress";
 export async function cacheMany(urls, type, skipped = false) {
 	// console.log("[cacher:cacheMany] url: " + urls + ", type: " + type);
+	console.log("[cacher:cacheMany]");
 
 	if (urls.length === 0 || urls === undefined || urls === null) {
 		console.log("[cacher:cacheMany] Error: urls is undefined or null.");
@@ -32,51 +34,54 @@ export async function cacheMany(urls, type, skipped = false) {
 		throw new Error("urls is undefined or null.");
 	}
 
+	const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+	bar.start(urls.length, 0);
+
 	for (let url of urls) {
 		// console.log("[cacher:cacheMany] Caching " + url);
-
 		await cacheOne(url, type, skipped);
+		bar.increment();
 	}
 
 	console.log("[cacher:cache] Done.");
 }
 
 export async function cacheOne(url, type, skipped = false) {
-	// console.log("[cacher:cacheOne] url: " + url + ", type: " + type);
+	// console.log("[cacher:cacheOne] url: " + url + ", type: " + type + ", skipped: " + skipped);
 
-	try {
-		let response = await fetcher.fetchHttpText(url);
-		console.log("[cacher:cacheOne] Success. URL: " + url.substring(url.lastIndexOf("-") + 1, url.lastIndexOf(".htm")));
+	const response = await fetcher
+		.fetchHttpText(url)
+		.then((result) => {
+			// console.log("[cacher:cacheOne] Fetched");
+			return result;
+		})
+		.catch((error) => {
+			console.log("[cacher:cacheOne] Error fetching: " + error.message);
+			return;
+		});
 
-		await cacheModel
-			.create({
-				type: type,
-				url: url,
-				content: response,
-				skipped: skipped,
-			})
-			.then((result) => {
-				return result;
-			})
-			.catch((error) => {
-				if (error.message.includes("E11000 duplicate key error")) {
-					let id = error.message.match(/(?<=dup key: { metadata.id: ").*(?=" })/g)[0];
-					console.log("[cacher:cacheOne] Error: Duplicate key: " + id);
-				} else {
-					console.log("[cacher:cacheOne] Error: " + error.message);
-				}
+	// let result =
+	await cacheModel
+		.create({
+			type: type,
+			url: url,
+			content: response,
+			skipped: skipped,
+		})
+		// .then((result) => {
+		// 	console.log("[cacher:cacheOne] Success. ID: " + result._id);
+		// 	return result;
+		// })
+		.catch((error) => {
+			if (error.message.includes("E11000 duplicate key error")) {
+				// let id = error.message.match(/(?<=dup key: { metadata.id: ").*(?=" })/g)[0];
+				// console.log("[cacher:cacheOne] Warning: Duplicate key: " + id);
 				return;
-			});
+			} else {
+				console.log("[cacher:cacheOne] Error creating: " + error.message);
+			}
+			return;
+		});
 
-		// console.log("[cacher:cacheOne] Success. ID: " + result._id);
-		return;
-	} catch (error) {
-		if (error.message.includes("E11000 duplicate key error")) {
-			let id = error.message.match(/(?<=dup key: { metadata.id: ").*(?=" })/g)[0];
-			console.log("[cacher:cacheOne] Error: Duplicate key: " + id);
-		} else {
-			console.log("[cacher:cacheOne] Error: " + error.message);
-		}
-		return;
-	}
+	return;
 }

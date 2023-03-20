@@ -34,6 +34,10 @@ GET https://tuoitre.vn/thanh-thep-roi-lam-3-nguoi-di-vien-cong-truong-lap-luoi-a
 
 ###
 
+GET https://tuoitre.vn/rrr-va-cuoc-giai-phong-am-nhac-20230319100823032.htm
+
+###
+
 GET https://tuoitrenews.vn/page?slug=ttn-politics&ajax=13---ttnews_custom_list&page_number=2
 
 ###
@@ -43,3 +47,7 @@ GET https://tuoitrenews.vn/page?slug=ttn-business&ajax=13---ttnews_custom_list&p
 ###
 
 GET https://thanhnien.vn/timelinelist/1854/1.htm
+
+###
+
+GET https://thanhnien.vn/tin-tuc-thoi-tiet-hom-nay-2032023-nang-nong-nhieu-noi-tren-ca-nuoc-185230320070120036.htm

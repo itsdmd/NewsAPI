@@ -6,7 +6,6 @@ dotenv.config();
 import express from "express";
 
 import { dateRouter } from "./routers/date.js";
-import * as parser from "./scripts/scraper/parser.js";
 import * as scraper from "./scripts/scraper/scraper.js";
 
 const port = process.env.PORT || 3000;
@@ -23,40 +22,35 @@ app.listen(port, () => {
 async function main(mode, baseUrl, startUrl, limit = 1) {
 	console.log("[server:main]");
 
-	// https://tuoitre.vn/timeline/3/trang-10.htm
-	// timeline:
-	// 		3:news
-	// 		11:business
-	// 		200029:tech
-
 	/* ------------ scraping ------------ */
-	await scraper.scrape(mode, baseUrl, startUrl, limit).catch((error) => {
-		console.log("[server:main] Error: " + error.message);
-		// })
-		// .finally(async () => {
-		// 	console.log("[server:main] Done scraping");
-
-		// 	/* ------------ parsing ------------ */
-		// 	await parser.parseCache(mode).finally(() => {
-		// 		console.log("[server:main] Done parsing");
-		// 	});
-	});
+	await scraper
+		.scrape(mode, baseUrl, startUrl, limit)
+		.catch((error) => {
+			console.log("[server:main] Error: " + error.message);
+		})
+		.finally(async () => {
+			console.log("[server:main] Done scraping");
+		});
 }
 
-// import * as cacher from "./scripts/scraper/cacher.js";
+/* -------------- tt-vn ------------- */
+// https://tuoitre.vn/timeline/3/trang-1.htm
+// 		3:news
+// 		11:business
+
+/* -------------- tn-vn ------------- */
+// https://thanhnien.vn/timelinelist/1854/1.htm
+// 		1854:news
+// 		18549:business
+
 async function test() {
+	await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 3300);
+	await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/11/trang-1.htm", 3300);
+
 	await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 10500);
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/18549/", "https://thanhnien.vn/timelinelist/18549/1.htm", 10500);
 }
 
 await test();
 
-// await main("vnx-vn", "https://vnexpress.net", "https://vnexpress.net/thoi-su", 2).then(() => {
-// 	main("vnx-vn", "https://vnexpress.net", "https://vnexpress.net/kinh-doanh", 2);
-// });
-
-// await main(
-// 	"vnx-en",
-// 	"https://e.vnexpress.net/category/listcategory/category_id/1003895/page/",
-// 	"https://e.vnexpress.net/category/listcategory/category_id/1003895/page/1",
-// 	-1
-// );
+process.exit(0);

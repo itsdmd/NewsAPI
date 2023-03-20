@@ -38,7 +38,7 @@ GET https://tuoitre.vn/rrr-va-cuoc-giai-phong-am-nhac-20230319100823032.htm
 
 ###
 
-GET https://tuoitrenews.vn/page?slug=ttn-politics&ajax=13---ttnews_custom_list&page_number=2
+GET https://tuoitre.vn/lo-sat-lo-hang-chuc-nguoi-dan-phan-ung-xang-cap-nao-vet-cat-2018011614303278.htm
 
 ###
 

@@ -84,6 +84,10 @@ export async function parseDom(dom, mode) {
 				let description = null;
 				try {
 					description = dom.querySelector("h2.detail-sapo").textContent;
+
+					// format: "\n       Description       \n"
+					// remove \n and trim
+					description = description.replace(/(\r \n|\n|\r)/gm, "").trim();
 				} catch (e) {
 					console.log("[parser:parseDom] Error parsing description: " + e);
 				}
@@ -160,7 +164,7 @@ export async function parseDom(dom, mode) {
 				}
 
 				let contentContainer = dom.querySelector("div.detail-content");
-				for (let i = 1; i < contentContainer.childElementCount; i++) {
+				for (let i = 1; i <= contentContainer.childElementCount; i++) {
 					let attributes = [];
 					let attr = {};
 
@@ -200,13 +204,24 @@ export async function parseDom(dom, mode) {
 							if (childNode.getAttribute("type") === "Photo") {
 								try {
 									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/FIGURE/src");
+								}
 
-									// the author is inside the caption
-									// Example: Caption goes here - Ảnh: PHẠM TUẤN -> author name is "PHẠM TUẤN"
-
-									const caption = childNode.childNodes[1].childNodes[0].textContent;
-
+								// the author is inside the caption
+								// Example: Caption goes here - Ảnh: PHẠM TUẤN -> author name is "PHẠM TUẤN"
+								let caption = "";
+								try {
+									caption = childNode.childNodes[1].childNodes[0].textContent;
+								} catch (e) {
+									console.log("[parser:parseDom] Error retreiving content/FIGURE/caption");
+								}
+								try {
 									attr.caption = caption.slice(0, caption.lastIndexOf("-")).trim();
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/FIGURE/caption");
+								}
+								try {
 									attr.author = caption
 										.slice(caption.lastIndexOf("-") + 1)
 										.split(":")
@@ -214,7 +229,7 @@ export async function parseDom(dom, mode) {
 										.join(" ")
 										.trim();
 								} catch (e) {
-									console.log("[parser:parseDom] Error parsing content/FIGURE/attr");
+									console.log("[parser:parseDom] Error parsing content/FIGURE/author");
 								}
 
 								try {
@@ -227,24 +242,73 @@ export async function parseDom(dom, mode) {
 							break;
 						}
 
-						// video
 						case "DIV": {
+							// video
 							if (childNode.getAttribute("type") === "VideoStream") {
 								try {
-									attr = {
-										src: "https://tuoitre.vn" + childNode.getAttribute("data-vid"),
-										thumbnail: childNode.getAttribute("data-thumb"),
-										caption: childNode.childNodes[0].childNodes[0].textContent,
-									};
+									attr.src = "https://tuoitre.vn" + childNode.getAttribute("data-vid");
 								} catch (e) {
-									console.log("[parser:parseDom] Error parsing content/DIV/attr");
+									console.log("[parser:parseDom] Error parsing content/DIV/src(data-vid)");
+								}
+
+								if (attr.src === null || attr.src === undefined || attr.src === "") {
+									try {
+										attr.src = "https:" + childNode.getAttribute("data-src");
+									} catch (e) {
+										console.log("[parser:parseDom] Error parsing content/DIV/src(data-src)");
+									}
 								}
 
 								try {
-									attributes.push(attr);
+									attr.thumbnail = childNode.getAttribute("data-thumb");
 								} catch (e) {
-									console.log("[parser:parseDom] Error parsing content/DIV/push");
+									// console.log("[parser:parseDom] Error parsing content/DIV/thumbnail");
 								}
+
+								try {
+									attr.caption = childNode.childNodes[0].childNodes[0].textContent;
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/DIV/caption");
+								}
+							}
+
+							// photo (old)
+							else if (childNode.getAttribute("type") === "Photo") {
+								try {
+									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/DIV/src");
+								}
+
+								let caption = "";
+								try {
+									caption = childNode.childNodes[1].childNodes[0].textContent;
+								} catch (e) {
+									console.log("[parser:parseDom] Error retreiving content/DIV/caption");
+								}
+								try {
+									attr.caption = caption.slice(0, caption.lastIndexOf("-")).trim();
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/DIV/caption");
+								}
+								try {
+									attr.author = caption
+										.slice(caption.lastIndexOf("-") + 1)
+										.split(":")
+										.slice(1)
+										.join(" ")
+										.trim();
+								} catch (e) {
+									console.log("[parser:parseDom] Error parsing content/DIV/author");
+								}
+							} else {
+								continue;
+							}
+
+							try {
+								attributes.push(attr);
+							} catch (e) {
+								console.log("[parser:parseDom] Error parsing content/DIV/push");
 							}
 
 							break;
@@ -393,10 +457,16 @@ export async function parseDom(dom, mode) {
 				let authors = [];
 				try {
 					if (dom.querySelector(".mauthor-title") === null || dom.querySelector(".mauthor-title") === undefined) {
-						authors.push({
-							name: dom.querySelector(".author-info-top a").title,
-							url: "https://thanhnien.vn" + dom.querySelector(".author-info-top a").href,
-						});
+						if (dom.querySelector(".author-info-top a") === null || dom.querySelector(".author-info-top a") === undefined) {
+							authors.push({
+								name: dom.querySelector("p[align='right'] strong").textContent,
+							});
+						} else {
+							authors.push({
+								name: dom.querySelector(".author-info-top a").textContent,
+								url: "https://thanhnien.vn" + dom.querySelector(".author-info-top a").href,
+							});
+						}
 					} else {
 						dom.querySelectorAll(".mauthor-title a").forEach((node) => {
 							authors.push({
@@ -551,7 +621,7 @@ import cliProgress from "cli-progress";
 export async function parseCache(mode, skipped = false) {
 	// console.log("[parser:parseCache]");
 
-	const startingCachedDoc = await cacheModel.count();
+	const startingCachedDoc = await cacheModel.find({ skipped: skipped }).count();
 	let currentCachedDocs = startingCachedDoc;
 	console.log("[parser:parseCache] numOfCachedDocs: " + currentCachedDocs);
 

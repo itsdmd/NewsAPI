@@ -43,20 +43,20 @@ async function main(mode, baseUrl, startUrl, limit = 1) {
 // 		1854:news
 // 		18549:business
 
-import * as cacher from "./scripts/scraper/cacher.js";
-import * as parser from "./scripts/scraper/parser.js";
+// import * as cacher from "./scripts/scraper/cacher.js";
+// import * as parser from "./scripts/scraper/parser.js";
 async function test() {
-	await cacher.cacheOne("https://tuoitre.vn/chuyen-gia-tran-dac-phu-di-cho-cach-nhat-la-hoi-day-20210803110154157.htm", false);
-	await parser.parseCache("tt-vn", false);
+	// await cacher.cacheOne("https://thanhnien.vn/thang-lon-nho-nang-nong-185205069.htm", false);
+	// await parser.parseCache("tn-vn", false);
 
 	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-4.htm", 3);
 	// await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 3);
 
 	/* ---------------- - --------------- */
-	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 3300);
-	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/11/trang-1.htm", 3300);
-	// await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 10500);
-	// await main("tn-vn", "https://thanhnien.vn/timelinelist/18549/", "https://thanhnien.vn/timelinelist/18549/1.htm", 10500);
+	await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 3300);
+	await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/11/trang-1.htm", 3300);
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 10920);
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/18549/", "https://thanhnien.vn/timelinelist/18549/1.htm", 4800);
 }
 
 await test();

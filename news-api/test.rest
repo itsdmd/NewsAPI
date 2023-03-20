@@ -42,6 +42,10 @@ GET https://tuoitre.vn/lo-sat-lo-hang-chuc-nguoi-dan-phan-ung-xang-cap-nao-vet-c
 
 ###
 
+GET https://tuoitre.vn/chuyen-nghiep-doi-tien-nha-bao-hiem-45554.htm
+
+###
+
 GET https://tuoitrenews.vn/page?slug=ttn-business&ajax=13---ttnews_custom_list&page_number=1
 
 ###

@@ -639,6 +639,10 @@ export async function parseDom(dom, mode) {
 
 										try {
 											attr.content = childElement.children[j].textContent.trim();
+
+											if (attr.content.length === 0) {
+												continue;
+											}
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/P/A/content");
 										}

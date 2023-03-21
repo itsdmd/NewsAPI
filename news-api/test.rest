@@ -57,3 +57,8 @@ GET https://thanhnien.vn/hon-2511-ti-dong-boi-thuong-giai-phong-mat-bang-2-du-an
 
 # 2009
 GET https://thanhnien.vn/ha-noi-chay-lien-kho-hang-thiet-hai-hang-tram-ti-dong-185359224.htm
+
+###
+
+# 2004
+GET https://thanhnien.vn/da-den-luc-rut-kinh-nghiem-thuc-su-185418775.htm

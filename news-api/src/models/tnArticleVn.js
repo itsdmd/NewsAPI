@@ -11,9 +11,6 @@ const tnVnArticleSchema = new Schema({
 			type: String,
 			required: true,
 		},
-		type: {
-			type: String,
-		},
 		category: {
 			type: String,
 		},

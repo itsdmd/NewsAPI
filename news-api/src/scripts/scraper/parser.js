@@ -67,7 +67,7 @@ export async function parseDom(dom, mode) {
 				// category
 				let category = null;
 				try {
-					category = dom.querySelector("div.detail-cate a").textContent;
+					category = dom.querySelector("div.detail-cate a").textContent.replace(/\n/g, "").trim();
 				} catch (e) {
 					console.log("\n[parser:parseDom] Error parsing category: " + e);
 				}
@@ -75,7 +75,7 @@ export async function parseDom(dom, mode) {
 				// title
 				let title = null;
 				try {
-					title = dom.querySelector("h1.detail-title").textContent;
+					title = dom.querySelector("h1.detail-title").textContent.replace(/\n/g, "").trim();
 				} catch (e) {
 					console.log("\n[parser:parseDom] Error parsing title: " + e);
 				}
@@ -83,7 +83,7 @@ export async function parseDom(dom, mode) {
 				// description
 				let description = null;
 				try {
-					description = dom.querySelector("h2.detail-sapo").textContent;
+					description = dom.querySelector("h2.detail-sapo").textContent.replace(/\n/g, "").trim();
 
 					// format: "\n       Description       \n"
 					// remove \n and trim
@@ -100,7 +100,7 @@ export async function parseDom(dom, mode) {
 						tag.getAttribute("title");
 
 						tags.push({
-							title: tag.textContent,
+							title: tag.textContent.replace(/\n/g, "").trim(),
 							url: "https://tuoitre.vn" + tag.getAttribute("href"),
 						});
 					});
@@ -136,7 +136,7 @@ export async function parseDom(dom, mode) {
 				try {
 					authorNodes.forEach((author) => {
 						authors.push({
-							name: author.textContent,
+							name: author.textContent.replace(/\n/g, "").trim(),
 							url: author.getAttribute("href") === "javascript:;" ? "" : "https://tuoitre.vn" + author.getAttribute("href"),
 						});
 					});
@@ -180,7 +180,7 @@ export async function parseDom(dom, mode) {
 										try {
 											attr = {
 												tag: childNode.childNodes[j].tagName,
-												content: childNode.childNodes[j].textContent,
+												content: childNode.childNodes[j].textContent.replace(/\n/g, "").trim(),
 												href: childNode.childNodes[j].getAttribute("href"),
 											};
 										} catch (e) {
@@ -212,7 +212,7 @@ export async function parseDom(dom, mode) {
 								// Example: Caption goes here - Ảnh: PHẠM TUẤN -> author name is "PHẠM TUẤN"
 								let caption = "";
 								try {
-									caption = childNode.childNodes[1].childNodes[0].textContent;
+									caption = childNode.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error retreiving content/FIGURE/caption");
 								}
@@ -266,7 +266,7 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.caption = childNode.childNodes[0].childNodes[0].textContent;
+									attr.caption = childNode.childNodes[0].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/DIV/caption");
 								}
@@ -282,7 +282,7 @@ export async function parseDom(dom, mode) {
 
 								let caption = "";
 								try {
-									caption = childNode.childNodes[1].childNodes[0].textContent;
+									caption = childNode.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error retreiving content/DIV/caption");
 								}
@@ -324,7 +324,7 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.caption = childNode.childNodes[0].childNodes[1].childNodes[0].textContent;
+									attr.caption = childNode.childNodes[0].childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/TABLE/caption");
 								}
@@ -373,7 +373,7 @@ export async function parseDom(dom, mode) {
 						else if (attributes.length === 0) {
 							content.push({
 								tag: childNode.tagName,
-								content: childNode.textContent,
+								content: childNode.textContent.trim(),
 							});
 						}
 
@@ -548,7 +548,7 @@ export async function parseDom(dom, mode) {
 						// older articles have the author name at the bottom right but still have a blank div.author-info-top
 						if (dom.querySelector(".author-info-top a").textContent.length) {
 							authors.push({
-								name: dom.querySelector(".author-info-top a").textContent,
+								name: dom.querySelector(".author-info-top a").textContent.replace(/\n/g, "").trim(),
 								url:
 									dom.querySelector(".author-info-top a").href === "javascript:;"
 										? ""
@@ -692,7 +692,7 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.author = childElement.childNodes[2].childNodes[0].textContent;
+									attr.author = childElement.childNodes[2].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/FIGURE/author");
 								}
@@ -733,7 +733,7 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.author = childElement.querySelector(".VideoCMS_Author").querySelector("p").textContent;
+									attr.author = childElement.querySelector(".VideoCMS_Author").querySelector("p").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/DIV/author");
 								}
@@ -757,17 +757,17 @@ export async function parseDom(dom, mode) {
 
 								try {
 									childElement.querySelector("div.boxhighlight-content").childNodes.forEach((node) => {
-										if (node.tagName === "P" && node.textContent.length > 0) {
+										if (node.getAttribute("align") === "right") {
+											attr.author = node.textContent.replace(/\n/g, "").trim();
+										} else if (node.textContent.length > 0) {
 											try {
 												highlightContent.push({
 													tag: node.tagName,
-													content: node.textContent,
+													content: node.textContent.replace(/\n/g, "").trim(),
 												});
 											} catch (e) {
 												console.log("\n[parser:parseDom] content/DIV/boxhighlight/P/attr");
 											}
-										} else if (node.getAttribute("align") === "right") {
-											attr.author = node.textContent;
 										}
 									});
 								} catch (e) {
@@ -780,11 +780,11 @@ export async function parseDom(dom, mode) {
 												} else {
 													highlightContent.push({
 														tag: "P",
-														content: childNodes[i].textContent,
+														content: childNodes[i].textContent.replace(/\n/g, "").trim(),
 													});
 												}
 											} catch (e) {
-												highlightContent.push(childNodes[i].textContent);
+												highlightContent.push(childNodes[i].textContent.replace(/\n/g, "").trim());
 											}
 										}
 									} catch (e) {
@@ -794,6 +794,7 @@ export async function parseDom(dom, mode) {
 
 								attributes.push({
 									content: highlightContent,
+									author: attr.author,
 								});
 
 								break;
@@ -805,13 +806,13 @@ export async function parseDom(dom, mode) {
 								addContentKey = false;
 
 								try {
-									attr.content = childElement.querySelector(".quote-content p").textContent;
+									attr.content = childElement.querySelector(".quote-content p").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] content/DIV/quote/content");
 								}
 
 								try {
-									attr.author = childElement.querySelector(".quote-author-info .q-name").textContent;
+									attr.author = childElement.querySelector(".quote-author-info .q-name").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/DIV/quote/author");
 								}
@@ -992,7 +993,7 @@ export async function parseDom(dom, mode) {
 										try {
 											highlightContent.push({
 												tag: childElement.querySelector(".quote > h3").tagName,
-												content: childElement.querySelector(".quote > h3").textContent,
+												content: childElement.querySelector(".quote > h3").textContent.replace(/\n/g, "").trim(),
 											});
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/DIV/quotetable/title");
@@ -1004,7 +1005,7 @@ export async function parseDom(dom, mode) {
 												if (node.textContent.replace(/\n/g, "").trim().length > 0) {
 													highlightContent.push({
 														tag: node.tagName,
-														content: node.textContent,
+														content: node.textContent.replace(/\n/g, "").trim(),
 													});
 												}
 											});

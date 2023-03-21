@@ -57,7 +57,7 @@ async function test() {
 	// await cacher.cacheOne("https://thanhnien.vn/ha-noi-chay-lien-kho-hang-thiet-hai-hang-tram-ti-dong-185359224.htm", false);
 	// await cacher.cacheOne("https://thanhnien.vn/da-den-luc-rut-kinh-nghiem-thuc-su-185418775.htm", false);
 	// await cacher.cacheOne("https://thanhnien.vn/5-cuu-tuong-canh-sat-bien-tham-o-chia-nhau-50-ti-dong-185230203021230689.htm", false);
-	// await cacher.cacheOne("https://thanhnien.vn/thu-tuong-tranh-tinh-trang-tang-truong-truoc-don-dep-sau-185230319160041623.htm", false);
+	// await cacher.cacheOne("https://thanhnien.vn/ong-nguyen-van-nen-nghiem-tri-nhung-nguoi-loi-dung-long-trac-an-de-lua-dao-185230321130316656.htm", false);
 	// await parser.parseCache("tn-vn", false);
 
 	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-4.htm", 3);

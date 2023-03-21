@@ -79,16 +79,21 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 					if (urls.length === 0) {
 						setTimeout(() => {
-							console.log("\n[fetcher:fetch] Waiting 15min. Started at " + new Date().toLocaleString());
-						}, 1000000).then(async () => {
+							console.log("\n[fetcher:fetch] Waiting 10secs. Started at " + new Date().toLocaleString());
+						}, 10000);
+
+						urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
+						if (urls.length === 0) {
+							setTimeout(() => {
+								console.log("\n[fetcher:fetch] Waiting 15mins. Started at " + new Date().toLocaleString());
+							}, 1000000);
+
 							urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
 							if (urls.length === 0) {
 								console.log("\n[fetcher:fetch] Error: scraping failed. Exitting...");
 								process.exit();
-							} else {
-								return;
 							}
-						});
+						}
 					}
 
 					await cacher.cacheMany(urls, mode, false).catch((error) => {

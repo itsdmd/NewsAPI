@@ -573,8 +573,6 @@ export async function parseDom(dom, mode) {
 				/* #endregion */
 
 				/* ------------- content ------------ */
-				// content
-
 				let content = [];
 				let contentContainer = dom.querySelectorAll("div.detail-content > *");
 
@@ -625,36 +623,36 @@ export async function parseDom(dom, mode) {
 							if (childElement.childElementCount) {
 								type = "texta";
 								for (let j = 0; j < childElement.childElementCount; j++) {
-									if (childElement.childNodes[j].tagName === "A") {
+									if (childElement.children[j].tagName === "A") {
 										try {
-											attr.tag = childElement.childNodes[j].tagName;
+											attr.tag = childElement.children[j].tagName;
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/P/A/tag");
 										}
 
 										try {
-											attr.content = childElement.childNodes[j].textContent.trim();
+											attr.content = childElement.children[j].textContent.trim();
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/P/A/content");
 										}
 
 										try {
-											attr.href = "https://thanhnien.vn" + childElement.childNodes[j].getAttribute("href");
+											attr.href = "https://thanhnien.vn" + childElement.children[j].getAttribute("href");
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/P/A/href");
 
 											attr.href = null;
 										}
-									}
 
-									try {
-										attributes.push({
-											tag: attr.tag,
-											content: attr.content,
-											href: attr.href,
-										});
-									} catch (e) {
-										console.log("\n[parser:parseDom] content/P/A/push");
+										try {
+											attributes.push({
+												tag: attr.tag,
+												content: attr.content,
+												href: attr.href,
+											});
+										} catch (e) {
+											console.log("\n[parser:parseDom] content/P/A/push");
+										}
 									}
 								}
 							}
@@ -677,7 +675,7 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.caption = childElement.querySelector("figcaption").textContent;
+									attr.caption = childElement.querySelector("figcaption").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/FIGURE/caption");
 								}
@@ -686,6 +684,16 @@ export async function parseDom(dom, mode) {
 									attr.author = childElement.childNodes[2].childNodes[0].textContent;
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/FIGURE/author");
+								}
+
+								try {
+									attributes.push({
+										src: attr.src,
+										caption: attr.caption,
+										author: attr.author,
+									});
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/FIGURE/push");
 								}
 							}
 
@@ -708,16 +716,22 @@ export async function parseDom(dom, mode) {
 								}
 
 								try {
-									attr.caption = childElement.querySelector(".VideoCMS_Caption").querySelector("p").textContent;
+									attr.caption = childElement.querySelector(".VideoCMS_Caption").querySelector("p").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] content/DIV/video/caption");
 								}
 
 								try {
-									attr.caption = childElement.querySelector(".VideoCMS_Author").querySelector("p").textContent;
+									attr.author = childElement.querySelector(".VideoCMS_Author").querySelector("p").textContent;
 								} catch (e) {
 									// console.log("\n[parser:parseDom] content/DIV/author");
 								}
+
+								attributes.push({
+									src: attr.src,
+									caption: attr.caption,
+									author: attr.author,
+								});
 
 								break;
 							}
@@ -745,7 +759,9 @@ export async function parseDom(dom, mode) {
 									}
 								});
 
-								attr.content = highlightContent;
+								attributes.push({
+									content: highlightContent,
+								});
 
 								break;
 							}
@@ -767,6 +783,11 @@ export async function parseDom(dom, mode) {
 									// console.log("\n[parser:parseDom] content/DIV/quote/author");
 								}
 
+								attributes.push({
+									content: attr.content,
+									author: attr.author,
+								});
+
 								break;
 							}
 
@@ -780,7 +801,7 @@ export async function parseDom(dom, mode) {
 								break;
 							}
 
-							// nested
+							// complex
 							else if (childElement.childElementCount > 0) {
 								// text with <a> tag
 								if (childElement.querySelector("a")) {
@@ -847,18 +868,34 @@ export async function parseDom(dom, mode) {
 										}
 
 										try {
-											attr.caption = childElement.querySelector("div.imgcaption p").textContent;
+											attr.caption = childElement.querySelector("div.imgcaption p").textContent.replace(/\n/g, "").trim();
 										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/img/caption");
+											try {
+												attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+											} catch (e) {
+												// console.log("\n[parser:parseDom] content/DIV/img/caption");
+											}
 										}
 
 										try {
-											attr.author = childElement.querySelector("div.imgcaption .source").textContent.split(":")[1].trim();
+											attr.author = childElement
+												.querySelector("div.imgcaption .source")
+												.textContent.replace(/\n/g, "")
+												.split(":")[1]
+												.trim();
 										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/img/author");
+											try {
+												attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").split(":")[1].trim();
+											} catch (e) {
+												// console.log("\n[parser:parseDom] content/DIV/img/author");
+											}
 										}
 
-										attributes.push(attr);
+										attributes.push({
+											src: attr.src,
+											caption: attr.caption,
+											attr: attr.author,
+										});
 
 										tagOverride.yes = true;
 										tagOverride.to = "FIGURE";
@@ -872,7 +909,7 @@ export async function parseDom(dom, mode) {
 										addContentKey = false;
 
 										try {
-											attr.src = childElement.querySelector("video").getAttribute("src");
+											attr.src = "https://hls.mediacdn.vn/" + childElement.querySelector("video").getAttribute("data-vid");
 										} catch (e) {
 											console.log("\n[parser:parseDom] content/DIV/video/src");
 
@@ -880,13 +917,17 @@ export async function parseDom(dom, mode) {
 										}
 
 										try {
-											attr.caption = childElement.querySelector(".imgcaption").textContent;
+											attr.caption = childElement.querySelector(".imgcaption").textContent.replace(/\n/g, "").trim();
 										} catch (e) {
 											// console.log("\n[parser:parseDom] content/DIV/video/caption");
 										}
 
 										try {
-											attr.author = childElement.querySelector("div.imgcaption .source").textContent.split(":")[1].trim();
+											attr.author = childElement
+												.querySelector("div.imgcaption .source")
+												.textContent.replace(/\n/g, "")
+												.split(":")[1]
+												.trim();
 										} catch (e) {
 											// console.log("\n[parser:parseDom] content/DIV/video/author");
 										}
@@ -896,6 +937,13 @@ export async function parseDom(dom, mode) {
 										} catch (e) {
 											// console.log("\n[parser:parseDom] content/DIV/video/thumbnail");
 										}
+
+										attributes.push({
+											src: attr.src,
+											author: attr.author,
+											caption: attr.caption,
+											thumbnail: attr.thumbnail,
+										});
 
 										break;
 									}
@@ -932,7 +980,9 @@ export async function parseDom(dom, mode) {
 										}
 
 										attr.content = highlightContent;
-										attributes.push(attr);
+										attributes.push({
+											content: attr.content,
+										});
 									}
 								}
 							} else {
@@ -976,6 +1026,8 @@ export async function parseDom(dom, mode) {
 					}
 				}
 
+				/* #region   */
+
 				// console.log("id: " + id);
 				// console.log("url: " + url);
 				// console.log("type: " + type);
@@ -987,6 +1039,8 @@ export async function parseDom(dom, mode) {
 				// console.log("publish_date: " + JSON.stringify(publish_date));
 				// console.log("authors: " + JSON.stringify(authors));
 				// console.log("content: " + JSON.stringify(content));
+
+				/* #endregion */
 
 				// create new ttVnArticle
 				const TnVnArticle = {
@@ -1131,9 +1185,9 @@ export async function parseCache(mode, skipped = false) {
 
 									currentCachedDocs--;
 
-									await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
-										console.log("\n[parser:parseCache] Added back to cache");
-									});
+									// await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+									// 	console.log("\n[parser:parseCache] Added back to cache");
+									// });
 								});
 						})
 						.catch(async (err) => {

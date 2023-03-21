@@ -40,6 +40,11 @@ GET https://thanhnien.vn/ngan-ngua-tham-nhung-tang-hieu-qua-giai-quyet-an-hanh-c
 
 ###
 
+# 2023 video
+GET https://thanhnien.vn/xet-xu-ba-trum-tung-giam-50-kg-sau-vu-sat-hai-trum-giang-ho-quan-xa-lo-185230321112512418.htm
+
+###
+
 # 2020, video
 GET https://thanhnien.vn/bo-cong-an-rut-de-xuat-thoi-han-bang-lai-xe-con-5-nam-185988475.htm
 

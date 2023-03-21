@@ -2,22 +2,6 @@ GET http://localhost:3000/date
 
 ###
 
-GET https://vnexpress.net/thoi-su-p1
-
-###
-
-GET https://vnexpress.net/19-tap-doan-tong-cong-ty-nha-nuoc-lai-hon-3-5-ty-usd-nam-2022-4582763.html
-
-###
-
-GET https://e.vnexpress.net/category/listcategory/category_id/1003894/page/1
-
-###
-
-GET https://e.vnexpress.net/news/news/heaviest-sea-turtle-seen-in-thua-thien-hue-released-back-to-ocean-4582150.html
-
-###
-
 GET https://tuoitre.vn/thoi-su/trang-1.htm
 
 ###
@@ -46,12 +30,30 @@ GET https://tuoitre.vn/chuyen-nghiep-doi-tien-nha-bao-hiem-45554.htm
 
 ###
 
-GET https://tuoitrenews.vn/page?slug=ttn-business&ajax=13---ttnews_custom_list&page_number=1
-
-###
-
+# TN feed
 GET https://thanhnien.vn/timelinelist/1854/1.htm
 
 ###
 
-GET https://thanhnien.vn/tin-tuc-thoi-tiet-hom-nay-2032023-nang-nong-nhieu-noi-tren-ca-nuoc-185230320070120036.htm
+# 2023, multiple authors, quote, highlight
+GET https://thanhnien.vn/ngan-ngua-tham-nhung-tang-hieu-qua-giai-quyet-an-hanh-chinh-185230320225820281.htm
+
+###
+
+# 2020, video
+GET https://thanhnien.vn/bo-cong-an-rut-de-xuat-thoi-han-bang-lai-xe-con-5-nam-185988475.htm
+
+###
+
+# 2018, photo, video, highlight
+GET https://thanhnien.vn/trang-dem-di-dan-chay-lu-185874066.htm
+
+###
+
+# 2015, photo
+GET https://thanhnien.vn/hon-2511-ti-dong-boi-thuong-giai-phong-mat-bang-2-du-an-o-dung-quat-185445866.htm
+
+###
+
+# 2009
+GET https://thanhnien.vn/ha-noi-chay-lien-kho-hang-thiet-hai-hang-tram-ti-dong-185359224.htm

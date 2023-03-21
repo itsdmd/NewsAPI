@@ -5,7 +5,6 @@ const tnVnArticleSchema = new Schema({
 		id: {
 			type: String,
 			required: true,
-			unique: true,
 		},
 		url: {
 			type: String,
@@ -41,12 +40,25 @@ const tnVnArticleSchema = new Schema({
 			},
 		],
 		publish_date: {
-			type: Date,
-			required: true,
+			year: {
+				type: Number,
+			},
+			month: {
+				type: Number,
+			},
+			day: {
+				type: Number,
+			},
+			hour: {
+				type: Number,
+			},
+			minute: {
+				type: Number,
+			},
 		},
 		authors: [
 			{
-				title: {
+				name: {
 					type: String,
 				},
 				url: {
@@ -59,6 +71,10 @@ const tnVnArticleSchema = new Schema({
 		{
 			tag: {
 				type: String,
+			},
+			type: {
+				type: String,
+				enum: ["text", "texta", "image", "video", "audio", "iframe", "quote", "highlight"], // texta: text with attributes
 			},
 			content: {
 				type: String,

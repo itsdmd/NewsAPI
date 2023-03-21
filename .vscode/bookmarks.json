@@ -34,82 +34,82 @@
 					"label": "tn"
 				},
 				{
-					"line": 607,
+					"line": 609,
 					"column": 6,
 					"label": "tn/txt"
 				},
 				{
-					"line": 662,
+					"line": 669,
 					"column": 6,
 					"label": "tn/fig"
 				},
 				{
-					"line": 702,
+					"line": 709,
 					"column": 6,
 					"label": "tn/div"
 				},
 				{
-					"line": 704,
+					"line": 711,
 					"column": 7,
 					"label": "tn/div/vid"
 				},
 				{
-					"line": 738,
+					"line": 745,
 					"column": 7,
 					"label": "tn/div/hl"
 				},
 				{
-					"line": 790,
+					"line": 797,
 					"column": 7,
 					"label": "tn/div/quo"
 				},
 				{
-					"line": 815,
+					"line": 822,
 					"column": 7,
 					"label": "tn/div/leg"
 				},
 				{
-					"line": 816,
+					"line": 823,
 					"column": 7,
 					"label": "tn/div/leg/txt"
 				},
 				{
-					"line": 825,
+					"line": 832,
 					"column": 7,
 					"label": "tn/div/leg/txta"
 				},
 				{
-					"line": 876,
+					"line": 883,
 					"column": 9,
 					"label": "tn/div/leg/pht"
 				},
 				{
-					"line": 927,
+					"line": 934,
 					"column": 9,
 					"label": "tn/div/leg/vid"
 				},
 				{
-					"line": 972,
+					"line": 979,
 					"column": 9,
 					"label": "tn/div/leg/hl"
 				},
 				{
-					"line": 1016,
+					"line": 1023,
 					"column": 6,
 					"label": "tn/tbl"
 				},
 				{
-					"line": 1018,
+					"line": 1025,
 					"column": 15,
 					"label": "tn/tbl/pht"
 				},
 				{
-					"line": 1060,
+					"line": 1067,
 					"column": 7,
 					"label": "tn/tbl/vid"
 				},
 				{
-					"line": 1115,
+					"line": 1122,
 					"column": 6,
 					"label": "tn/nbx"
 				}

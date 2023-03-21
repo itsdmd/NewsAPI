@@ -577,6 +577,7 @@ export async function parseDom(dom, mode) {
 				let contentContainer = dom.querySelectorAll("div.detail-content > *");
 
 				for (let i = 0; i < contentContainer.length; i++) {
+					/* #region   */
 					// remove all \n and trim. if empty, continue
 					if (contentContainer[i].textContent.replace(/\n/g, "").trim().length === 0) {
 						continue;
@@ -598,6 +599,7 @@ export async function parseDom(dom, mode) {
 						yes: false,
 						to: "",
 					};
+					/* #endregion */
 
 					let attributes = [];
 					let attr = {};
@@ -621,6 +623,11 @@ export async function parseDom(dom, mode) {
 							}
 
 							if (childElement.childElementCount) {
+								if (childElement.querySelectorAll("BR").length === childElement.childElementCount) {
+									type = "text";
+									break;
+								}
+
 								type = "texta";
 								for (let j = 0; j < childElement.childElementCount; j++) {
 									if (childElement.children[j].tagName === "A") {
@@ -708,7 +715,7 @@ export async function parseDom(dom, mode) {
 								addContentKey = false;
 
 								try {
-									attr.src = "https://" + childElement.getAttribute("vid");
+									attr.src = "https://" + childElement.getAttribute("data-vid");
 								} catch (e) {
 									console.log("\n[parser:parseDom] content/DIV/video/src");
 
@@ -1233,7 +1240,8 @@ export async function parseCache(mode, skipped = false) {
 
 	const startingCachedDoc = await cacheModel.find({ skipped: skipped }).count();
 	let currentCachedDocs = startingCachedDoc;
-	console.log("\n[parser:parseCache] numOfCachedDocs: " + currentCachedDocs);
+	// console.log("\n[parser:parseCache] numOfCachedDocs: " + currentCachedDocs);
+	console.log("\n");
 
 	const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 	bar.start(startingCachedDoc, 0);

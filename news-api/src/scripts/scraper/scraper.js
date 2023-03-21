@@ -72,6 +72,8 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 			let i = limit;
 
 			while (i !== 0) {
+				console.log("\n[scraper:scrape] Page " + (limit - i + 1) + " / " + limit);
+
 				try {
 					let html = await fetcher.fetchHttpText(startUrl);
 

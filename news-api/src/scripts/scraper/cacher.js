@@ -43,7 +43,7 @@ export async function cacheMany(urls, type, skipped = false) {
 		bar.increment();
 	}
 
-	console.log("\n[cacher:cache] Done.");
+	// console.log("\n[cacher:cache] Done.");
 }
 
 export async function cacheOne(url, type, skipped = false) {

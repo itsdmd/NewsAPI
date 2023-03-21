@@ -744,20 +744,42 @@ export async function parseDom(dom, mode) {
 
 								let highlightContent = [];
 
-								childElement.querySelector("div.boxhighlight-content").childNodes.forEach((node) => {
-									if (node.tagName === "P" && node.textContent.length > 0) {
-										try {
-											highlightContent.push({
-												tag: node.tagName,
-												content: node.textContent,
-											});
-										} catch (e) {
-											console.log("\n[parser:parseDom] content/DIV/boxhighlight/P/attr");
+								try {
+									childElement.querySelector("div.boxhighlight-content").childNodes.forEach((node) => {
+										if (node.tagName === "P" && node.textContent.length > 0) {
+											try {
+												highlightContent.push({
+													tag: node.tagName,
+													content: node.textContent,
+												});
+											} catch (e) {
+												console.log("\n[parser:parseDom] content/DIV/boxhighlight/P/attr");
+											}
+										} else if (node.getAttribute("align") === "right") {
+											attr.author = node.textContent;
 										}
-									} else if (node.getAttribute("align") === "right") {
-										attr.author = node.textContent;
+									});
+								} catch (e) {
+									try {
+										let childNodes = childElement.querySelector("div.boxhighlight-content").childNodes;
+										for (let i = 0; i < childNodes.length; i++) {
+											try {
+												if (childNodes[i].tagName === "BR") {
+													continue;
+												} else {
+													highlightContent.push({
+														tag: "P",
+														content: childNodes[i].textContent,
+													});
+												}
+											} catch (e) {
+												highlightContent.push(childNodes[i].textContent);
+											}
+										}
+									} catch (e) {
+										console.log("\n[parser:parseDom] content/DIV/boxhighlight/content");
 									}
-								});
+								}
 
 								attributes.push({
 									content: highlightContent,
@@ -992,7 +1014,139 @@ export async function parseDom(dom, mode) {
 							break;
 						}
 
+						// legacy photo/video
+						case "TABLE": {
+							// photo
+							if (childElement.classList.contains("picture")) {
+								type = "image";
+								tagOverride.yes = true;
+								tagOverride.to = "FIGURE";
+								addContentKey = false;
+
+								try {
+									attr.src = childElement.querySelector("img").getAttribute("src");
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/TABLE/img/src");
+
+									attr.src = "";
+								}
+
+								try {
+									attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
+								} catch (e) {
+									try {
+										attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+									} catch (e) {
+										// console.log("\n[parser:parseDom] content/TABLE/img/caption");
+									}
+								}
+
+								try {
+									attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
+								} catch (e) {
+									// console.log("\n[parser:parseDom] content/TABLE/img/author");
+								}
+
+								try {
+									attributes.push({
+										src: attr.src,
+										caption: attr.caption,
+										author: attr.author,
+									});
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/TABLE/img/attributes");
+								}
+							}
+
+							// video
+							else if (childElement.classList.contains("video")) {
+								type = "video";
+								tagOverride.yes = true;
+								tagOverride.to = "DIV";
+								addContentKey = false;
+
+								try {
+									attr.src = childElement.querySelector("video").getAttribute("src");
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/TABLE/video/src");
+
+									attr.src = "";
+								}
+
+								try {
+									attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
+								} catch (e) {
+									try {
+										attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+									} catch (e) {
+										// console.log("\n[parser:parseDom] content/TABLE/video/caption");
+									}
+								}
+
+								try {
+									attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
+								} catch (e) {
+									// console.log("\n[parser:parseDom] content/TABLE/video/author");
+								}
+
+								try {
+									attr.thumbnail = childElement.querySelector("video").getAttribute("poster");
+								} catch (e) {
+									// console.log("\n[parser:parseDom] content/TABLE/video/thumbnail");
+								}
+
+								try {
+									attributes.push({
+										src: attr.src,
+										caption: attr.caption,
+										author: attr.author,
+										thumbnail: attr.thumbnail,
+									});
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/TABLE/video/attributes");
+								}
+							} else {
+								// console.log("\n[parser:parseDom] content/TABLE/else");
+								continue;
+							}
+
+							break;
+						}
+
+						// highlight
+						case "NOTEBOX": {
+							type = "highlight";
+							tagOverride.yes = true;
+							tagOverride.to = "DIV";
+
+							try {
+								for (let i = 0; i < childElement.children.length; i++) {
+									if (childElement.children[i].querySelector("A")) {
+										let allA = childElement.children[i].querySelectorAll("A");
+										allA.forEach((a) => {
+											attributes.push({
+												tag: a.tagName,
+												content: a.textContent.replace(/\n/g, "").trim(),
+											});
+										});
+									} else {
+										attributes.push({
+											tag: childElement.children[i].tagName,
+											content: childElement.children[i].textContent.replace(/\n/g, "").trim(),
+										});
+									}
+								}
+
+								break;
+							} catch (e) {
+								console.log("\n[parser:parseDom] content/NOTEBOX");
+							}
+
+							break;
+						}
+
 						default:
+							// console.log("\n[parser:parseDom] Unknown tag: " + childElement.tagName);
 							continue;
 					}
 

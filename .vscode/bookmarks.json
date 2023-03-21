@@ -1,0 +1,119 @@
+{
+	"files": [
+		{
+			"path": "news-api/src/scripts/scraper/parser.js",
+			"bookmarks": [
+				{
+					"line": 173,
+					"column": 9,
+					"label": "tt/txt"
+				},
+				{
+					"line": 201,
+					"column": 14,
+					"label": "tt/fig"
+				},
+				{
+					"line": 245,
+					"column": 9,
+					"label": "tt/div/vid"
+				},
+				{
+					"line": 274,
+					"column": 10,
+					"label": "tt/div/pht"
+				},
+				{
+					"line": 317,
+					"column": 10,
+					"label": "tt/tbl/pht"
+				},
+				{
+					"line": 431,
+					"column": 3,
+					"label": "tn"
+				},
+				{
+					"line": 607,
+					"column": 6,
+					"label": "tn/txt"
+				},
+				{
+					"line": 662,
+					"column": 6,
+					"label": "tn/fig"
+				},
+				{
+					"line": 702,
+					"column": 6,
+					"label": "tn/div"
+				},
+				{
+					"line": 704,
+					"column": 7,
+					"label": "tn/div/vid"
+				},
+				{
+					"line": 738,
+					"column": 7,
+					"label": "tn/div/hl"
+				},
+				{
+					"line": 790,
+					"column": 7,
+					"label": "tn/div/quo"
+				},
+				{
+					"line": 815,
+					"column": 7,
+					"label": "tn/div/leg"
+				},
+				{
+					"line": 816,
+					"column": 7,
+					"label": "tn/div/leg/txt"
+				},
+				{
+					"line": 825,
+					"column": 7,
+					"label": "tn/div/leg/txta"
+				},
+				{
+					"line": 876,
+					"column": 9,
+					"label": "tn/div/leg/pht"
+				},
+				{
+					"line": 927,
+					"column": 9,
+					"label": "tn/div/leg/vid"
+				},
+				{
+					"line": 972,
+					"column": 9,
+					"label": "tn/div/leg/hl"
+				},
+				{
+					"line": 1016,
+					"column": 6,
+					"label": "tn/tbl"
+				},
+				{
+					"line": 1018,
+					"column": 15,
+					"label": "tn/tbl/pht"
+				},
+				{
+					"line": 1060,
+					"column": 7,
+					"label": "tn/tbl/vid"
+				},
+				{
+					"line": 1115,
+					"column": 6,
+					"label": "tn/nbx"
+				}
+			]
+		}
+	]
+}

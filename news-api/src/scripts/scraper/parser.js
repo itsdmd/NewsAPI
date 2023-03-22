@@ -448,14 +448,6 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] url: " + e);
 				}
 
-				// type
-				let type = "";
-				try {
-					type = dom.querySelector("meta[property='og:type']").getAttribute("content");
-				} catch (e) {
-					console.log("\n[parser:parseDom] type: " + e);
-				}
-
 				// category
 				let category = "";
 				try {
@@ -513,22 +505,43 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] publish_date/year");
 				}
 				try {
-					publish_date.month = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[0].split("-")[1];
+					// left pad with 0
+					publish_date.month = dom
+						.querySelector("meta[property='article:published_time']")
+						.getAttribute("content")
+						.split("T")[0]
+						.split("-")[1]
+						.padStart(2, "0");
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/month");
 				}
 				try {
-					publish_date.day = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[0].split("-")[2];
+					publish_date.day = dom
+						.querySelector("meta[property='article:published_time']")
+						.getAttribute("content")
+						.split("T")[0]
+						.split("-")[2]
+						.padStart(2, "0");
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/day");
 				}
 				try {
-					publish_date.hour = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[1].split(":")[0];
+					publish_date.hour = dom
+						.querySelector("meta[property='article:published_time']")
+						.getAttribute("content")
+						.split("T")[1]
+						.split(":")[0]
+						.padStart(2, "0");
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/hour");
 				}
 				try {
-					publish_date.minute = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[1].split(":")[1];
+					publish_date.minute = dom
+						.querySelector("meta[property='article:published_time']")
+						.getAttribute("content")
+						.split("T")[1]
+						.split(":")[1]
+						.padStart(2, "0");
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/minute");
 				}
@@ -721,15 +734,21 @@ export async function parseDom(dom, mode) {
 								try {
 									attr.src = "https://" + childElement.getAttribute("data-vid");
 								} catch (e) {
-									console.log("\n[parser:parseDom] content/DIV/video/src");
+									try {
+										attr.src = dom.querySelector(".box-video").querySelector("iframe").getAttribute("src");
+									} catch (e) {
+										console.log("\n[parser:parseDom] content/DIV/video/src");
+									}
 
-									attr.src = "";
+									if (attr.src === null || attr.src === undefined) {
+										attr.src = "";
+									}
 								}
 
 								try {
 									attr.caption = childElement.querySelector(".VideoCMS_Caption").querySelector("p").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
-									console.log("\n[parser:parseDom] content/DIV/video/caption");
+									// console.log("\n[parser:parseDom] content/DIV/video/caption");
 								}
 
 								try {
@@ -806,9 +825,9 @@ export async function parseDom(dom, mode) {
 								addContentKey = false;
 
 								try {
-									attr.content = childElement.querySelector(".quote-content p").textContent.replace(/\n/g, "").trim();
+									attr.content = childElement.querySelector(".quote-content").textContent.replace(/\n/g, "").trim();
 								} catch (e) {
-									console.log("\n[parser:parseDom] content/DIV/quote/content");
+									// console.log("\n[parser:parseDom] content/DIV/quote/content");
 								}
 
 								try {
@@ -821,6 +840,54 @@ export async function parseDom(dom, mode) {
 									content: attr.content,
 									author: attr.author,
 								});
+
+								break;
+							}
+
+							// older highlight
+							else if (childElement.querySelector("div.quote")) {
+								type = "highlight";
+								addContentKey = false;
+
+								if (childElement.querySelector("div.quote__content").childElementCount) {
+									let content = [];
+									let node = childElement.querySelector("div.quote");
+
+									for (let i = 0; i < node.childElementCount; i++) {
+										if (node.children[i].tagName === "H3") {
+											try {
+												content.push({
+													tag: "H3",
+													content: node.children[i].textContent.replace(/\n/g, "").trim(),
+												});
+											} catch (e) {
+												// console.log("\n[parser:parseDom] content/DIV/quote/content");
+											}
+										} else if (node.children[i].textContent.length) {
+											try {
+												content.push({
+													tag: "P",
+													content: node.children[i].textContent.replace(/\n/g, "").trim(),
+												});
+											} catch (e) {
+												// console.log("\n[parser:parseDom] content/DIV/quote/content");
+											}
+										}
+									}
+
+									try {
+										attr.author = childElement.querySelector("strong").textContent.replace(/\n/g, "").trim();
+									} catch (e) {
+										// console.log("\n[parser:parseDom] content/DIV/quote/author");
+									}
+
+									attributes.push({
+										content: content,
+										author: attr.author,
+									});
+
+									break;
+								}
 
 								break;
 							}
@@ -991,12 +1058,29 @@ export async function parseDom(dom, mode) {
 
 										// title
 										try {
-											highlightContent.push({
-												tag: childElement.querySelector(".quote > h3").tagName,
-												content: childElement.querySelector(".quote > h3").textContent.replace(/\n/g, "").trim(),
-											});
+											let tagName = childElement.querySelector(".quote > *").tagName;
+											if (tagName === "H2" || tagName === "H3") {
+												highlightContent.push({
+													tag: tagName,
+													content: childElement
+														.querySelector(".quote > " + tagName)
+														.textContent.replace(/\n/g, "")
+														.trim(),
+												});
+											} else {
+												tagName = childElement.querySelector(".quote__content > *").tagName;
+												if (tagName === "H2" || tagName === "H3") {
+													highlightContent.push({
+														tag: tagName,
+														content: childElement
+															.querySelector(".quote__content > " + tagName)
+															.textContent.replace(/\n/g, "")
+															.trim(),
+													});
+												}
+											}
 										} catch (e) {
-											console.log("\n[parser:parseDom] content/DIV/quotetable/title");
+											// console.log("\n[parser:parseDom] content/DIV/quotetable/title");
 										}
 
 										// content
@@ -1013,9 +1097,8 @@ export async function parseDom(dom, mode) {
 											console.log("\n[parser:parseDom] content/DIV/quotetable/content");
 										}
 
-										attr.content = highlightContent;
 										attributes.push({
-											content: attr.content,
+											content: highlightContent,
 										});
 									}
 								}
@@ -1213,7 +1296,6 @@ export async function parseDom(dom, mode) {
 					metadata: {
 						id: id,
 						url: url,
-						type: type,
 						category: category,
 						title: title,
 						description: description,

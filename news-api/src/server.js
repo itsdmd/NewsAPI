@@ -57,19 +57,17 @@ async function test() {
 	// await cacher.cacheOne("https://thanhnien.vn/ha-noi-chay-lien-kho-hang-thiet-hai-hang-tram-ti-dong-185359224.htm", false);
 	// await cacher.cacheOne("https://thanhnien.vn/da-den-luc-rut-kinh-nghiem-thuc-su-185418775.htm", false);
 	// await cacher.cacheOne("https://thanhnien.vn/5-cuu-tuong-canh-sat-bien-tham-o-chia-nhau-50-ti-dong-185230203021230689.htm", false);
-	// await cacher.cacheOne("https://thanhnien.vn/ong-nguyen-van-nen-nghiem-tri-nhung-nguoi-loi-dung-long-trac-an-de-lua-dao-185230321130316656.htm", false);
+	// await cacher.cacheOne("https://thanhnien.vn/de-dat-mo-cua-1851112538.htm", false);
 	// await parser.parseCache("tn-vn", false);
-
 	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-4.htm", 3);
 	// await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 3);
-
 	/* ---------------- - --------------- */
 	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 3300);
 	// await main("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/11/trang-1.htm", 3300);
-
 	/* ---------------- - --------------- */
-	await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 10920);
-	await main("tn-vn", "https://thanhnien.vn/timelinelist/18549/", "https://thanhnien.vn/timelinelist/18549/1.htm", 4800);
+	// TODO: Refetch "quote" docs
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/5587.htm", 10920 - 5587);
+	await main("tn-vn", "https://thanhnien.vn/timelinelist/18549/", "https://thanhnien.vn/timelinelist/18549/38.htm", 4800 - 38);
 }
 
 await test();

@@ -80,26 +80,27 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					let urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
 
 					if (urls.length === 0) {
-						setTimeout(() => {
-							console.log("\n[fetcher:fetch] Waiting 10secs. Started at " + new Date().toLocaleString());
-						}, 10000);
+						let limit = 10;
 
-						urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
-						if (urls.length === 0) {
+						do {
 							setTimeout(() => {
-								console.log("\n[fetcher:fetch] Waiting 15mins. Started at " + new Date().toLocaleString());
-							}, 1000000);
+								console.log("\n[scraper:scrape] Waiting 10secs. Started at " + new Date().toLocaleString());
+							}, 10000);
 
 							urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
-							if (urls.length === 0) {
-								console.log("\n[fetcher:fetch] Error: scraping failed. Exitting...");
-								process.exit();
-							}
+							limit--;
+						} while (urls.length === 0 && limit !== 0);
+
+						if (urls.length === 0) {
+							console.log("\n[scraper:scrape] Error: scraping failed. Skipping...");
+
+							i--;
+							continue;
 						}
 					}
 
 					await cacher.cacheMany(urls, mode, false).catch((error) => {
-						console.log("\n[scraper:scrape] Error: " + error.message);
+						console.log("\n[scraper:scrape] Error caching: " + error.message);
 						return;
 					});
 

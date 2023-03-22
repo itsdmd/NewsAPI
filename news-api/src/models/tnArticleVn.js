@@ -38,19 +38,19 @@ const tnVnArticleSchema = new Schema({
 		],
 		publish_date: {
 			year: {
-				type: Number,
+				type: String,
 			},
 			month: {
-				type: Number,
+				type: String,
 			},
 			day: {
-				type: Number,
+				type: String,
 			},
 			hour: {
-				type: Number,
+				type: String,
 			},
 			minute: {
-				type: Number,
+				type: String,
 			},
 		},
 		authors: [

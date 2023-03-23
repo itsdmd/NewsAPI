@@ -459,7 +459,7 @@ export async function parseDom(dom, mode) {
 				// title
 				let title = "";
 				try {
-					title = dom.querySelector("meta[property='og:title']").getAttribute("content");
+					title = dom.querySelector("meta[property='og:title']").getAttribute("content").trim();
 				} catch (e) {
 					console.log("\n[parser:parseDom] title: " + e);
 				}
@@ -467,7 +467,7 @@ export async function parseDom(dom, mode) {
 				// description
 				let description = "";
 				try {
-					description = dom.querySelector("meta[property='og:description']").getAttribute("content");
+					description = dom.querySelector("meta[property='og:description']").getAttribute("content").trim();
 				} catch (e) {
 					console.log("\n[parser:parseDom] description: " + e);
 				}
@@ -498,15 +498,15 @@ export async function parseDom(dom, mode) {
 
 				// publish_date
 				/* #region   */
-				let publish_date = {};
+				let pubdate = {};
 				try {
-					publish_date.year = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[0].split("-")[0];
+					pubdate.year = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[0].split("-")[0];
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/year");
 				}
 				try {
 					// left pad with 0
-					publish_date.month = dom
+					pubdate.month = dom
 						.querySelector("meta[property='article:published_time']")
 						.getAttribute("content")
 						.split("T")[0]
@@ -516,7 +516,7 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] publish_date/month");
 				}
 				try {
-					publish_date.day = dom
+					pubdate.day = dom
 						.querySelector("meta[property='article:published_time']")
 						.getAttribute("content")
 						.split("T")[0]
@@ -526,7 +526,7 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] publish_date/day");
 				}
 				try {
-					publish_date.hour = dom
+					pubdate.hour = dom
 						.querySelector("meta[property='article:published_time']")
 						.getAttribute("content")
 						.split("T")[1]
@@ -536,7 +536,7 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] publish_date/hour");
 				}
 				try {
-					publish_date.minute = dom
+					pubdate.minute = dom
 						.querySelector("meta[property='article:published_time']")
 						.getAttribute("content")
 						.split("T")[1]
@@ -545,6 +545,13 @@ export async function parseDom(dom, mode) {
 				} catch (e) {
 					console.log("\n[parser:parseDom] publish_date/minute");
 				}
+				try {
+					pubdate.isodate = pubdate.year + "-" + pubdate.month + "-" + pubdate.day + "T" + pubdate.hour + ":" + pubdate.minute + ":00+07:00";
+					pubdate.isodate = new Date(pubdate.isodate).toISOString();
+				} catch (e) {
+					console.log("\n[parser:parseDom] publish_date/isodate");
+				}
+
 				/* #endregion */
 
 				// authors
@@ -553,7 +560,7 @@ export async function parseDom(dom, mode) {
 					if (dom.querySelector(".mauthor-title")) {
 						dom.querySelectorAll(".mauthor-title a").forEach((node) => {
 							authors.push({
-								name: node.title,
+								name: node.title.replace(/\n/g, "").trim(),
 								url: node.href === "javascript:;" ? "" : "https://thanhnien.vn" + node.href,
 							});
 						});
@@ -766,6 +773,42 @@ export async function parseDom(dom, mode) {
 								break;
 							}
 
+							// older photo
+							// else if (childElement.querySelector("table").querySelector("img")) {
+							// 	type = "image";
+							// 	tagOverride.yes = true;
+							// 	tagOverride.to = "FIGURE";
+							// 	addContentKey = false;
+
+							// 	try {
+							// 		attr.src = childElement.querySelector("table").querySelector("img").getAttribute("src");
+							// 	} catch (e) {
+							// 		console.log("\n[parser:parseDom] content/DIV/image/src");
+							// 	}
+
+							// 	try {
+							// 		attr.caption = childElement
+							// 			.querySelector("table")
+							// 			.querySelector("img")
+							// 			.getAttribute("alt")
+							// 			.textContent.replace(/\n/g, "")
+							// 			.trim();
+							// 	} catch (e) {
+							// 		try {
+							// 			attr.caption = childElement.querySelector("table").textContent.replace(/\n/g, "").trim();
+							// 		} catch (e) {
+							// 			// console.log("\n[parser:parseDom] content/DIV/image/caption");
+							// 		}
+							// 	}
+
+							// 	attributes.push({
+							// 		src: attr.src,
+							// 		caption: attr.caption,
+							// 	});
+
+							// 	break;
+							// }
+
 							// highlight
 							// NOTE: <a> tags within the highlight are very rare and will be ignored
 							else if (childElement.getAttribute("type") === "boxhighlight") {
@@ -845,368 +888,370 @@ export async function parseDom(dom, mode) {
 							}
 
 							// older highlight
-							else if (childElement.querySelector("div.quote")) {
-								type = "highlight";
-								addContentKey = false;
+							// else if (childElement.querySelector("div.quote")) {
+							// 	type = "highlight";
+							// 	addContentKey = false;
 
-								if (childElement.querySelector("div.quote__content").childElementCount) {
-									let content = [];
-									let node = childElement.querySelector("div.quote");
+							// 	if (childElement.querySelector("div.quote__content").childElementCount) {
+							// 		let content = [];
+							// 		let node = childElement.querySelector("div.quote");
 
-									for (let i = 0; i < node.childElementCount; i++) {
-										if (node.children[i].tagName === "H3") {
-											try {
-												content.push({
-													tag: "H3",
-													content: node.children[i].textContent.replace(/\n/g, "").trim(),
-												});
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/quote/content");
-											}
-										} else if (node.children[i].textContent.length) {
-											try {
-												content.push({
-													tag: "P",
-													content: node.children[i].textContent.replace(/\n/g, "").trim(),
-												});
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/quote/content");
-											}
-										}
-									}
+							// 		for (let i = 0; i < node.childElementCount; i++) {
+							// 			if (node.children[i].tagName === "H3") {
+							// 				try {
+							// 					content.push({
+							// 						tag: "H3",
+							// 						content: node.children[i].textContent.replace(/\n/g, "").trim(),
+							// 					});
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/quote/content");
+							// 				}
+							// 			} else if (node.children[i].textContent.length) {
+							// 				try {
+							// 					content.push({
+							// 						tag: "P",
+							// 						content: node.children[i].textContent.replace(/\n/g, "").trim(),
+							// 					});
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/quote/content");
+							// 				}
+							// 			}
+							// 		}
 
-									try {
-										attr.author = childElement.querySelector("strong").textContent.replace(/\n/g, "").trim();
-									} catch (e) {
-										// console.log("\n[parser:parseDom] content/DIV/quote/author");
-									}
+							// 		try {
+							// 			attr.author = childElement.querySelector("strong").textContent.replace(/\n/g, "").trim();
+							// 		} catch (e) {
+							// 			// console.log("\n[parser:parseDom] content/DIV/quote/author");
+							// 		}
 
-									attributes.push({
-										content: content,
-										author: attr.author,
-									});
+							// 		attributes.push({
+							// 			content: content,
+							// 			author: attr.author,
+							// 		});
 
-									break;
-								}
+							// 		break;
+							// 	}
 
-								break;
-							}
+							// 	break;
+							// }
 
 							/* ------------- legacy ------------- */
+							/* #region   */
 							// plain text
-							else if (childElement.childElementCount === 0 && childElement.textContent.replace(/\n/g, "").trim().length > 0) {
-								type = "text";
-								tagOverride.yes = true;
-								tagOverride.to = "P";
+							// else if (childElement.childElementCount === 0 && childElement.textContent.replace(/\n/g, "").trim().length > 0) {
+							// 	type = "text";
+							// 	tagOverride.yes = true;
+							// 	tagOverride.to = "P";
 
-								break;
-							}
+							// 	break;
+							// }
 
-							// complex
-							else if (childElement.childElementCount > 0) {
-								// text with <a> tag
-								if (childElement.querySelector("a")) {
-									type = "texta";
-									tagOverride.yes = true;
-									tagOverride.to = "P";
+							// // complex
+							// else if (childElement.childElementCount > 0) {
+							// 	// text with <a> tag
+							// 	if (childElement.querySelector("a")) {
+							// 		type = "texta";
+							// 		tagOverride.yes = true;
+							// 		tagOverride.to = "P";
 
-									let children = childElement.children;
+							// 		let children = childElement.children;
 
-									for (let j = 0; j < children.length; j++) {
-										let child = children[j];
+							// 		for (let j = 0; j < children.length; j++) {
+							// 			let child = children[j];
 
-										if (child.tagName === "A") {
-											try {
-												attr.tag = child.tagName;
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/A/tag");
-											}
+							// 			if (child.tagName === "A") {
+							// 				try {
+							// 					attr.tag = child.tagName;
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/A/tag");
+							// 				}
 
-											try {
-												attr.content = child.textContent.trim();
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/A/content");
-											}
+							// 				try {
+							// 					attr.content = child.textContent.trim();
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/A/content");
+							// 				}
 
-											try {
-												attr.href = "https://thanhnien.vn" + child.getAttribute("href");
-											} catch (e) {
-												console.log("\n[parser:parseDom] content/DIV/A/href");
+							// 				try {
+							// 					attr.href = "https://thanhnien.vn" + child.getAttribute("href");
+							// 				} catch (e) {
+							// 					console.log("\n[parser:parseDom] content/DIV/A/href");
 
-												attr.href = null;
-											}
+							// 					attr.href = null;
+							// 				}
 
-											try {
-												attributes.push({
-													tag: attr.tag,
-													content: attr.content,
-													href: attr.href,
-												});
-											} catch (e) {
-												console.log("\n[parser:parseDom] content/DIV/A/push");
-											}
-										}
-									}
+							// 				try {
+							// 					attributes.push({
+							// 						tag: attr.tag,
+							// 						content: attr.content,
+							// 						href: attr.href,
+							// 					});
+							// 				} catch (e) {
+							// 					console.log("\n[parser:parseDom] content/DIV/A/push");
+							// 				}
+							// 			}
+							// 		}
 
-									break;
-								}
+							// 		break;
+							// 	}
 
-								// photo & video
-								else if (childElement.querySelector("table")) {
-									// photo
-									if (childElement.querySelector("table.imagefull")) {
-										type = "image";
-										addContentKey = false;
-										tagOverride.yes = true;
-										tagOverride.to = "FIGURE";
+							// 	// photo & video
+							// 	else if (childElement.querySelector("table")) {
+							// 		// photo
+							// 		if (childElement.querySelector("table.imagefull")) {
+							// 			type = "image";
+							// 			addContentKey = false;
+							// 			tagOverride.yes = true;
+							// 			tagOverride.to = "FIGURE";
 
-										try {
-											attr.src = childElement.querySelector("img").getAttribute("src");
-										} catch (e) {
-											console.log("\n[parser:parseDom] content/DIV/img/src");
+							// 			try {
+							// 				attr.src = childElement.querySelector("img").getAttribute("src");
+							// 			} catch (e) {
+							// 				console.log("\n[parser:parseDom] content/DIV/img/src");
 
-											attr.src = "";
-										}
+							// 				attr.src = "";
+							// 			}
 
-										try {
-											attr.caption = childElement.querySelector("div.imgcaption p").textContent.replace(/\n/g, "").trim();
-										} catch (e) {
-											try {
-												attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/img/caption");
-											}
-										}
+							// 			try {
+							// 				attr.caption = childElement.querySelector("div.imgcaption p").textContent.replace(/\n/g, "").trim();
+							// 			} catch (e) {
+							// 				try {
+							// 					attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/img/caption");
+							// 				}
+							// 			}
 
-										try {
-											attr.author = childElement
-												.querySelector("div.imgcaption .source")
-												.textContent.replace(/\n/g, "")
-												.split(":")[1]
-												.trim();
-										} catch (e) {
-											try {
-												attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").split(":")[1].trim();
-											} catch (e) {
-												// console.log("\n[parser:parseDom] content/DIV/img/author");
-											}
-										}
+							// 			try {
+							// 				attr.author = childElement
+							// 					.querySelector("div.imgcaption .source")
+							// 					.textContent.replace(/\n/g, "")
+							// 					.split(":")[1]
+							// 					.trim();
+							// 			} catch (e) {
+							// 				try {
+							// 					attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").split(":")[1].trim();
+							// 				} catch (e) {
+							// 					// console.log("\n[parser:parseDom] content/DIV/img/author");
+							// 				}
+							// 			}
 
-										attributes.push({
-											src: attr.src,
-											caption: attr.caption,
-											attr: attr.author,
-										});
+							// 			attributes.push({
+							// 				src: attr.src,
+							// 				caption: attr.caption,
+							// 				attr: attr.author,
+							// 			});
 
-										tagOverride.yes = true;
-										tagOverride.to = "FIGURE";
+							// 			tagOverride.yes = true;
+							// 			tagOverride.to = "FIGURE";
 
-										break;
-									}
+							// 			break;
+							// 		}
 
-									// video
-									else if (childElement.querySelector("table.video")) {
-										type = "video";
-										addContentKey = false;
+							// 		// video
+							// 		else if (childElement.querySelector("table.video")) {
+							// 			type = "video";
+							// 			addContentKey = false;
 
-										try {
-											attr.src = "https://hls.mediacdn.vn/" + childElement.querySelector("video").getAttribute("data-vid");
-										} catch (e) {
-											console.log("\n[parser:parseDom] content/DIV/video/src");
+							// 			try {
+							// 				attr.src = "https://hls.mediacdn.vn/" + childElement.querySelector("video").getAttribute("data-vid");
+							// 			} catch (e) {
+							// 				console.log("\n[parser:parseDom] content/DIV/video/src");
 
-											attr.src = "";
-										}
+							// 				attr.src = "";
+							// 			}
 
-										try {
-											attr.caption = childElement.querySelector(".imgcaption").textContent.replace(/\n/g, "").trim();
-										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/video/caption");
-										}
+							// 			try {
+							// 				attr.caption = childElement.querySelector(".imgcaption").textContent.replace(/\n/g, "").trim();
+							// 			} catch (e) {
+							// 				// console.log("\n[parser:parseDom] content/DIV/video/caption");
+							// 			}
 
-										try {
-											attr.author = childElement
-												.querySelector("div.imgcaption .source")
-												.textContent.replace(/\n/g, "")
-												.split(":")[1]
-												.trim();
-										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/video/author");
-										}
+							// 			try {
+							// 				attr.author = childElement
+							// 					.querySelector("div.imgcaption .source")
+							// 					.textContent.replace(/\n/g, "")
+							// 					.split(":")[1]
+							// 					.trim();
+							// 			} catch (e) {
+							// 				// console.log("\n[parser:parseDom] content/DIV/video/author");
+							// 			}
 
-										try {
-											attr.thumbnail = childElement.querySelector("video").getAttribute("poster");
-										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/video/thumbnail");
-										}
+							// 			try {
+							// 				attr.thumbnail = childElement.querySelector("video").getAttribute("poster");
+							// 			} catch (e) {
+							// 				// console.log("\n[parser:parseDom] content/DIV/video/thumbnail");
+							// 			}
 
-										attributes.push({
-											src: attr.src,
-											author: attr.author,
-											caption: attr.caption,
-											thumbnail: attr.thumbnail,
-										});
+							// 			attributes.push({
+							// 				src: attr.src,
+							// 				author: attr.author,
+							// 				caption: attr.caption,
+							// 				thumbnail: attr.thumbnail,
+							// 			});
 
-										break;
-									}
+							// 			break;
+							// 		}
 
-									// highlight
-									else if (childElement.querySelector("table.quotetable")) {
-										type = "highlight";
-										addContentKey = false;
+							// 		// highlight
+							// 		else if (childElement.querySelector("table.quotetable")) {
+							// 			type = "highlight";
+							// 			addContentKey = false;
 
-										let highlightContent = [];
+							// 			let highlightContent = [];
 
-										// title
-										try {
-											let tagName = childElement.querySelector(".quote > *").tagName;
-											if (tagName === "H2" || tagName === "H3") {
-												highlightContent.push({
-													tag: tagName,
-													content: childElement
-														.querySelector(".quote > " + tagName)
-														.textContent.replace(/\n/g, "")
-														.trim(),
-												});
-											} else {
-												tagName = childElement.querySelector(".quote__content > *").tagName;
-												if (tagName === "H2" || tagName === "H3") {
-													highlightContent.push({
-														tag: tagName,
-														content: childElement
-															.querySelector(".quote__content > " + tagName)
-															.textContent.replace(/\n/g, "")
-															.trim(),
-													});
-												}
-											}
-										} catch (e) {
-											// console.log("\n[parser:parseDom] content/DIV/quotetable/title");
-										}
+							// 			// title
+							// 			try {
+							// 				let tagName = childElement.querySelector(".quote > *").tagName;
+							// 				if (tagName === "H2" || tagName === "H3") {
+							// 					highlightContent.push({
+							// 						tag: tagName,
+							// 						content: childElement
+							// 							.querySelector(".quote > " + tagName)
+							// 							.textContent.replace(/\n/g, "")
+							// 							.trim(),
+							// 					});
+							// 				} else {
+							// 					tagName = childElement.querySelector(".quote__content > *").tagName;
+							// 					if (tagName === "H2" || tagName === "H3") {
+							// 						highlightContent.push({
+							// 							tag: tagName,
+							// 							content: childElement
+							// 								.querySelector(".quote__content > " + tagName)
+							// 								.textContent.replace(/\n/g, "")
+							// 								.trim(),
+							// 						});
+							// 					}
+							// 				}
+							// 			} catch (e) {
+							// 				// console.log("\n[parser:parseDom] content/DIV/quotetable/title");
+							// 			}
 
-										// content
-										try {
-											childElement.querySelector(".quote > div").childNodes.forEach((node) => {
-												if (node.textContent.replace(/\n/g, "").trim().length > 0) {
-													highlightContent.push({
-														tag: node.tagName,
-														content: node.textContent.replace(/\n/g, "").trim(),
-													});
-												}
-											});
-										} catch (e) {
-											console.log("\n[parser:parseDom] content/DIV/quotetable/content");
-										}
+							// 			// content
+							// 			try {
+							// 				childElement.querySelector(".quote > div").childNodes.forEach((node) => {
+							// 					if (node.textContent.replace(/\n/g, "").trim().length > 0) {
+							// 						highlightContent.push({
+							// 							tag: node.tagName,
+							// 							content: node.textContent.replace(/\n/g, "").trim(),
+							// 						});
+							// 					}
+							// 				});
+							// 			} catch (e) {
+							// 				console.log("\n[parser:parseDom] content/DIV/quotetable/content");
+							// 			}
 
-										attributes.push({
-											content: highlightContent,
-										});
-									}
-								}
-							} else {
-								continue;
-							}
+							// 			attributes.push({
+							// 				content: highlightContent,
+							// 			});
+							// 		}
+							// 	}
+							// } else {
+							// 	continue;
+							// }
+							/* #endregion */
 
 							break;
 						}
 
 						// legacy photo/video
-						case "TABLE": {
-							// photo
-							if (childElement.classList.contains("picture")) {
-								type = "image";
-								tagOverride.yes = true;
-								tagOverride.to = "FIGURE";
-								addContentKey = false;
+						// case "TABLE": {
+						// 	// photo
+						// 	if (childElement.classList.contains("picture") || childElement.querySelector("img")) {
+						// 		type = "image";
+						// 		tagOverride.yes = true;
+						// 		tagOverride.to = "FIGURE";
+						// 		addContentKey = false;
 
-								try {
-									attr.src = childElement.querySelector("img").getAttribute("src");
-								} catch (e) {
-									console.log("\n[parser:parseDom] content/TABLE/img/src");
+						// 		try {
+						// 			attr.src = childElement.querySelector("img").getAttribute("src");
+						// 		} catch (e) {
+						// 			console.log("\n[parser:parseDom] content/TABLE/img/src");
 
-									attr.src = "";
-								}
+						// 			attr.src = "";
+						// 		}
 
-								try {
-									attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
-								} catch (e) {
-									try {
-										attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
-									} catch (e) {
-										// console.log("\n[parser:parseDom] content/TABLE/img/caption");
-									}
-								}
+						// 		try {
+						// 			attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
+						// 		} catch (e) {
+						// 			try {
+						// 				attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+						// 			} catch (e) {
+						// 				// console.log("\n[parser:parseDom] content/TABLE/img/caption");
+						// 			}
+						// 		}
 
-								try {
-									attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
-								} catch (e) {
-									// console.log("\n[parser:parseDom] content/TABLE/img/author");
-								}
+						// 		try {
+						// 			attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
+						// 		} catch (e) {
+						// 			// console.log("\n[parser:parseDom] content/TABLE/img/author");
+						// 		}
 
-								try {
-									attributes.push({
-										src: attr.src,
-										caption: attr.caption,
-										author: attr.author,
-									});
-								} catch (e) {
-									console.log("\n[parser:parseDom] content/TABLE/img/attributes");
-								}
-							}
+						// 		try {
+						// 			attributes.push({
+						// 				src: attr.src,
+						// 				caption: attr.caption,
+						// 				author: attr.author,
+						// 			});
+						// 		} catch (e) {
+						// 			console.log("\n[parser:parseDom] content/TABLE/img/attributes");
+						// 		}
+						// 	}
 
-							// video
-							else if (childElement.classList.contains("video")) {
-								type = "video";
-								tagOverride.yes = true;
-								tagOverride.to = "DIV";
-								addContentKey = false;
+						// 	// video
+						// 	else if (childElement.classList.contains("video")) {
+						// 		type = "video";
+						// 		tagOverride.yes = true;
+						// 		tagOverride.to = "DIV";
+						// 		addContentKey = false;
 
-								try {
-									attr.src = childElement.querySelector("video").getAttribute("src");
-								} catch (e) {
-									console.log("\n[parser:parseDom] content/TABLE/video/src");
+						// 		try {
+						// 			attr.src = childElement.querySelector("video").getAttribute("src");
+						// 		} catch (e) {
+						// 			console.log("\n[parser:parseDom] content/TABLE/video/src");
 
-									attr.src = "";
-								}
+						// 			attr.src = "";
+						// 		}
 
-								try {
-									attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
-								} catch (e) {
-									try {
-										attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
-									} catch (e) {
-										// console.log("\n[parser:parseDom] content/TABLE/video/caption");
-									}
-								}
+						// 		try {
+						// 			attr.caption = childElement.querySelector("[class~='caption']").textContent.replace(/\n/g, "").trim();
+						// 		} catch (e) {
+						// 			try {
+						// 				attr.caption = childElement.querySelector("span").textContent.replace(/\n/g, "").trim();
+						// 			} catch (e) {
+						// 				// console.log("\n[parser:parseDom] content/TABLE/video/caption");
+						// 			}
+						// 		}
 
-								try {
-									attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
-								} catch (e) {
-									// console.log("\n[parser:parseDom] content/TABLE/video/author");
-								}
+						// 		try {
+						// 			attr.author = childElement.querySelector("[class~='author']").textContent.replace(/\n/g, "").trim();
+						// 		} catch (e) {
+						// 			// console.log("\n[parser:parseDom] content/TABLE/video/author");
+						// 		}
 
-								try {
-									attr.thumbnail = childElement.querySelector("video").getAttribute("poster");
-								} catch (e) {
-									// console.log("\n[parser:parseDom] content/TABLE/video/thumbnail");
-								}
+						// 		try {
+						// 			attr.thumbnail = childElement.querySelector("video").getAttribute("poster");
+						// 		} catch (e) {
+						// 			// console.log("\n[parser:parseDom] content/TABLE/video/thumbnail");
+						// 		}
 
-								try {
-									attributes.push({
-										src: attr.src,
-										caption: attr.caption,
-										author: attr.author,
-										thumbnail: attr.thumbnail,
-									});
-								} catch (e) {
-									console.log("\n[parser:parseDom] content/TABLE/video/attributes");
-								}
-							} else {
-								// console.log("\n[parser:parseDom] content/TABLE/else");
-								continue;
-							}
+						// 		try {
+						// 			attributes.push({
+						// 				src: attr.src,
+						// 				caption: attr.caption,
+						// 				author: attr.author,
+						// 				thumbnail: attr.thumbnail,
+						// 			});
+						// 		} catch (e) {
+						// 			console.log("\n[parser:parseDom] content/TABLE/video/attributes");
+						// 		}
+						// 	} else {
+						// 		// console.log("\n[parser:parseDom] content/TABLE/else");
+						// 		continue;
+						// 	}
 
-							break;
-						}
+						// 	break;
+						// }
 
 						// highlight
 						case "NOTEBOX": {
@@ -1301,7 +1346,7 @@ export async function parseDom(dom, mode) {
 						description: description,
 						keywords: keywords,
 						tags: tags,
-						publish_date: publish_date,
+						pubdate: pubdate,
 						authors: authors,
 					},
 					content: content,

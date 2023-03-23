@@ -14,7 +14,7 @@ console.log("\n[transactor] Connecting to Database.");
 
 db.on("error", (error) => console.log("\n[transactor] Error connecting to database: " + error));
 db.once("open", async () => {
-	console.log("\n[transactor.js] Connected to Database");
+	console.log("\n[transactor] Connected to Database");
 });
 
 export async function addTtVnArticle(article) {

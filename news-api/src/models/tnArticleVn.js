@@ -21,11 +21,6 @@ const tnVnArticleSchema = new Schema({
 		description: {
 			type: String,
 		},
-		keywords: [
-			{
-				type: String,
-			},
-		],
 		tags: [
 			{
 				title: {
@@ -36,7 +31,7 @@ const tnVnArticleSchema = new Schema({
 				},
 			},
 		],
-		publish_date: {
+		pubdate: {
 			year: {
 				type: String,
 			},
@@ -51,6 +46,23 @@ const tnVnArticleSchema = new Schema({
 			},
 			minute: {
 				type: String,
+			},
+			isodate: {
+				type: Date,
+				default: function () {
+					return Date(
+						this.metadata.pubdate.year +
+							"-" +
+							this.metadata.pubdate.month +
+							"-" +
+							this.metadata.pubdate.day +
+							"T" +
+							this.metadata.pubdate.hour +
+							":" +
+							this.metadata.pubdate.minute +
+							":00+07:00"
+					);
+				},
 			},
 		},
 		authors: [

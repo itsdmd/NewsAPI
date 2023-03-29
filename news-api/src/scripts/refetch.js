@@ -13,6 +13,7 @@ async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 	return;
 }
+
 async function test() {
 	/* #region   */
 	/* -------------- tt-vn ------------- */
@@ -30,17 +31,13 @@ async function test() {
 	const cacher = await import("./scraper/cacher.js");
 	const parser = await import("./scraper/parser.js");
 
-	/* ------- initialize database ------ */
-	await cacher.cacheOne(
-		"https://thanhnien.vn/viet-nam-len-tieng-ve-thong-tin-tau-trung-quoc-di-vao-vung-dac-quyen-kinh-te-185230328115948966.htm",
-		"tn-vn",
-		false
-	);
-	await parser.parseCache("tn-vn");
+	await cacher.cacheOne("", "tt-vn", false);
+	await parser.parseCache("tt-vn");
 }
 
 // await test();
 
+await scrape("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 2);
 await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 2);
 
 process.exit(0);

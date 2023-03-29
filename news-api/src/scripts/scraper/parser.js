@@ -107,26 +107,41 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] Error parsing tags: " + e);
 				}
 
-				// publish_date
+				// pubdate
 				// 18/03/2023 18:37 GMT+7
-				// convert to isodate (2023-03-18T18:37:00+7:00)
+				/* #region   */
 				let rawDate = dom.querySelector("div[data-role='publishdate']").textContent.trim();
-				let publish_date = null;
+				let pubdate = {};
 				try {
-					publish_date =
-						rawDate.substring(6, 10) +
-						"-" +
-						rawDate.substring(3, 5) +
-						"-" +
-						rawDate.substring(0, 2) +
-						"T" +
-						rawDate.substring(11, 13) +
-						":" +
-						rawDate.substring(14, 16) +
-						":00+07:00";
+					pubdate.year = rawDate.substring(6, 10);
 				} catch (e) {
-					console.log("\n[parser:parseDom] Error parsing publish_date: " + e);
+					console.log("\n[parser:parseDom] pubdate/year");
 				}
+
+				try {
+					pubdate.month = rawDate.substring(3, 5);
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/month");
+				}
+
+				try {
+					pubdate.day = rawDate.substring(0, 2);
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/day");
+				}
+
+				try {
+					pubdate.hour = rawDate.substring(11, 13);
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/hour");
+				}
+
+				try {
+					pubdate.minute = rawDate.substring(14, 16);
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/minute");
+				}
+				/* #endregion */
 
 				// authors
 				let authors = [];
@@ -162,25 +177,38 @@ export async function parseDom(dom, mode) {
 					});
 				}
 
-				let contentContainer = dom.querySelector("div.detail-content");
-				for (let i = 0; i < contentContainer.childNodes.length; i++) {
+				let contentContainer = dom.querySelectorAll("div.detail-content > *");
+				for (let i = 0; i < contentContainer.length; i++) {
 					let attributes = [];
 					let attr = {};
+					let type = "";
+					let addContentKey = true;
+					let tagOverride = "";
 
-					let childNode = contentContainer.childNodes[i];
+					let childElement = contentContainer[i];
 
-					switch (childNode.tagName) {
+					switch (childElement.tagName) {
 						// text
 						case "H2":
 						case "P": {
-							if (childNode.childElementCount) {
-								for (let j = 0; j < childNode.childElementCount; j++) {
-									if (childNode.childNodes[j].tagName === "A") {
+							if (childElement.childElementCount) {
+								type = "text";
+								if (childElement.textContent.length === 0) {
+									break;
+								}
+
+								if (childElement.querySelectorAll("BR").length === childElement.childElementCount) {
+									type = "text";
+									break;
+								}
+
+								for (let j = 0; j < childElement.childElementCount; j++) {
+									if (childElement.childNodes[j].tagName === "A") {
 										try {
 											attr = {
-												tag: childNode.childNodes[j].tagName,
-												content: childNode.childNodes[j].textContent.replace(/\n/g, "").trim(),
-												href: childNode.childNodes[j].getAttribute("href"),
+												tag: childElement.childNodes[j].tagName,
+												content: childElement.childNodes[j].textContent.replace(/\n/g, "").trim(),
+												href: childElement.childNodes[j].getAttribute("href"),
 											};
 										} catch (e) {
 											console.log("\n[parser:parseDom] Error parsing content/A");
@@ -200,9 +228,12 @@ export async function parseDom(dom, mode) {
 
 						// photo
 						case "FIGURE": {
-							if (childNode.getAttribute("type") === "Photo") {
+							type = "image";
+							addContentKey = false;
+
+							if (childElement.getAttribute("type") === "Photo") {
 								try {
-									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+									attr.src = childElement.childNodes[0].childNodes[0].getAttribute("src");
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/FIGURE/src");
 								}
@@ -211,7 +242,7 @@ export async function parseDom(dom, mode) {
 								// Example: Caption goes here - Ảnh: PHẠM TUẤN -> author name is "PHẠM TUẤN"
 								let caption = "";
 								try {
-									caption = childNode.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
+									caption = childElement.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error retreiving content/FIGURE/caption");
 								}
@@ -243,45 +274,53 @@ export async function parseDom(dom, mode) {
 
 						case "DIV": {
 							// video
-							if (childNode.getAttribute("type") === "VideoStream") {
+							if (childElement.getAttribute("type") === "VideoStream") {
+								type = "video";
+								addContentKey = false;
+
 								try {
-									attr.src = "https://tuoitre.vn" + childNode.getAttribute("data-vid");
+									attr.src = "https://hls.tuoitre.vn/" + childElement.getAttribute("data-vid");
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/DIV/src(data-vid)");
 								}
 
 								if (attr.src === null || attr.src === undefined || attr.src === "") {
 									try {
-										attr.src = "https:" + childNode.getAttribute("data-src");
+										attr.src = "https:" + childElement.getAttribute("data-src");
 									} catch (e) {
 										console.log("\n[parser:parseDom] Error parsing content/DIV/src(data-src)");
 									}
 								}
 
 								try {
-									attr.thumbnail = childNode.getAttribute("data-thumb");
+									attr.thumbnail = childElement.getAttribute("data-thumb");
 								} catch (e) {
 									// console.log("\n[parser:parseDom] Error parsing content/DIV/thumbnail");
 								}
 
 								try {
-									attr.caption = childNode.childNodes[0].childNodes[0].textContent.replace(/\n/g, "").trim();
+									attr.caption = childElement.childNodes[0].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/DIV/caption");
 								}
 							}
 
 							// photo (old)
-							else if (childNode.getAttribute("type") === "Photo") {
+							else if (childElement.getAttribute("type") === "Photo") {
+								type = "image";
+								addContentKey = false;
+
+								tagOverride = "FIGURE";
+
 								try {
-									attr.src = childNode.childNodes[0].childNodes[0].getAttribute("src");
+									attr.src = childElement.childNodes[0].childNodes[0].getAttribute("src");
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/DIV/src");
 								}
 
 								let caption = "";
 								try {
-									caption = childNode.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
+									caption = childElement.childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error retreiving content/DIV/caption");
 								}
@@ -315,15 +354,19 @@ export async function parseDom(dom, mode) {
 
 						case "TABLE": {
 							// photo
-							if (childNode.classList.contains("desc_image")) {
+							if (childElement.classList.contains("desc_image")) {
+								type = "image";
+								addContentKey = false;
+								tagOverride = "FIGURE";
+
 								try {
-									attr.src = "https:" + childNode.querySelector("img").getAttribute("src");
+									attr.src = "https:" + childElement.querySelector("img").getAttribute("src");
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/TABLE/src");
 								}
 
 								try {
-									attr.caption = childNode.childNodes[0].childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
+									attr.caption = childElement.childNodes[0].childNodes[1].childNodes[0].textContent.replace(/\n/g, "").trim();
 								} catch (e) {
 									console.log("\n[parser:parseDom] Error parsing content/TABLE/caption");
 								}
@@ -339,10 +382,10 @@ export async function parseDom(dom, mode) {
 						}
 
 						default:
-							if (childNode.textContent.trim() !== "") {
+							if (childElement.textContent.trim() !== "") {
 								content.push({
 									tag: "P",
-									content: childNode.textContent.trim(),
+									content: childElement.textContent.trim(),
 								});
 								// continue;
 							}
@@ -353,15 +396,15 @@ export async function parseDom(dom, mode) {
 
 					try {
 						// video
-						if (childNode.tagName === "FIGURE" || childNode.getAttribute("type") === "VideoStream") {
+						if (childElement.tagName === "FIGURE" || childElement.getAttribute("type") === "VideoStream") {
 							content.push({
-								tag: childNode.tagName,
+								tag: childElement.tagName,
 								attributes: attributes,
 							});
 						}
 
 						// photo in table (old)
-						else if (childNode.tagName === "TABLE" && attributes.length > 0) {
+						else if (childElement.tagName === "TABLE" && attributes.length > 0) {
 							content.push({
 								tag: "FIGURE",
 								attributes: attributes,
@@ -371,16 +414,16 @@ export async function parseDom(dom, mode) {
 						// blank attributes
 						else if (attributes.length === 0) {
 							content.push({
-								tag: childNode.tagName,
-								content: childNode.textContent.trim(),
+								tag: childElement.tagName,
+								content: childElement.textContent.trim(),
 							});
 						}
 
 						// other
 						else {
 							content.push({
-								tag: childNode.tagName,
-								content: childNode.textContent.trim(),
+								tag: childElement.tagName,
+								content: childElement.textContent.trim(),
 								attributes: attributes,
 							});
 						}
@@ -388,7 +431,7 @@ export async function parseDom(dom, mode) {
 						try {
 							content.push({
 								tag: "P",
-								content: childNode.textContent.trim(),
+								content: childElement.textContent.trim(),
 							});
 							continue;
 						} catch (e) {
@@ -407,7 +450,7 @@ export async function parseDom(dom, mode) {
 						title: title,
 						description: description,
 						tags: tags,
-						publish_date: publish_date,
+						pubdate: pubdate,
 						authors: authors,
 					},
 					content: content,
@@ -495,13 +538,13 @@ export async function parseDom(dom, mode) {
 					console.log("\n[parser:parseDom] tags: " + e);
 				}
 
-				// publish_date
+				// pubdate
 				/* #region   */
 				let pubdate = {};
 				try {
 					pubdate.year = dom.querySelector("meta[property='article:published_time']").getAttribute("content").split("T")[0].split("-")[0];
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/year");
+					console.log("\n[parser:parseDom] pubdate/year");
 				}
 				try {
 					// left pad with 0
@@ -512,7 +555,7 @@ export async function parseDom(dom, mode) {
 						.split("-")[1]
 						.padStart(2, "0");
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/month");
+					console.log("\n[parser:parseDom] pubdate/month");
 				}
 				try {
 					pubdate.day = dom
@@ -522,7 +565,7 @@ export async function parseDom(dom, mode) {
 						.split("-")[2]
 						.padStart(2, "0");
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/day");
+					console.log("\n[parser:parseDom] pubdate/day");
 				}
 				try {
 					pubdate.hour = dom
@@ -532,7 +575,7 @@ export async function parseDom(dom, mode) {
 						.split(":")[0]
 						.padStart(2, "0");
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/hour");
+					console.log("\n[parser:parseDom] pubdate/hour");
 				}
 				try {
 					pubdate.minute = dom
@@ -542,13 +585,13 @@ export async function parseDom(dom, mode) {
 						.split(":")[1]
 						.padStart(2, "0");
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/minute");
+					console.log("\n[parser:parseDom] pubdate/minute");
 				}
 				try {
 					pubdate.isodate = pubdate.year + "-" + pubdate.month + "-" + pubdate.day + "T" + pubdate.hour + ":" + pubdate.minute + ":00+07:00";
 					pubdate.isodate = new Date(pubdate.isodate).toISOString();
 				} catch (e) {
-					console.log("\n[parser:parseDom] publish_date/isodate");
+					console.log("\n[parser:parseDom] pubdate/isodate");
 				}
 
 				/* #endregion */
@@ -610,16 +653,11 @@ export async function parseDom(dom, mode) {
 					if (contentContainer[i].childNodes[0].tagName === "STRONG") {
 						break;
 					}
+					/* #endregion */
 
 					let type = "";
 					let addContentKey = true;
-
-					let tagOverride = {
-						yes: false,
-						to: "",
-					};
-					/* #endregion */
-
+					let tagOverride = "";
 					let attributes = [];
 					let attr = {};
 
@@ -856,8 +894,8 @@ export async function parseDom(dom, mode) {
 							// older photo
 							// else if (childElement.querySelector("table").querySelector("img")) {
 							// 	type = "image";
-							// 	tagOverride.yes = true;
-							// 	tagOverride.to = "FIGURE";
+
+							// 	tagOverride = "FIGURE";
 							// 	addContentKey = false;
 
 							// 	try {
@@ -940,8 +978,8 @@ export async function parseDom(dom, mode) {
 							// plain text
 							// else if (childElement.childElementCount === 0 && childElement.textContent.replace(/\n/g, "").trim().length > 0) {
 							// 	type = "text";
-							// 	tagOverride.yes = true;
-							// 	tagOverride.to = "P";
+
+							// 	tagOverride = "P";
 
 							// 	break;
 							// }
@@ -951,8 +989,8 @@ export async function parseDom(dom, mode) {
 							// 	// text with <a> tag
 							// 	if (childElement.querySelector("a")) {
 							// 		type = "texta";
-							// 		tagOverride.yes = true;
-							// 		tagOverride.to = "P";
+
+							// 		tagOverride = "P";
 
 							// 		let children = childElement.children;
 
@@ -1001,8 +1039,8 @@ export async function parseDom(dom, mode) {
 							// 		if (childElement.querySelector("table.imagefull")) {
 							// 			type = "image";
 							// 			addContentKey = false;
-							// 			tagOverride.yes = true;
-							// 			tagOverride.to = "FIGURE";
+
+							// 			tagOverride = "FIGURE";
 
 							// 			try {
 							// 				attr.src = childElement.querySelector("img").getAttribute("src");
@@ -1042,8 +1080,7 @@ export async function parseDom(dom, mode) {
 							// 				attr: attr.author,
 							// 			});
 
-							// 			tagOverride.yes = true;
-							// 			tagOverride.to = "FIGURE";
+							// 			tagOverride = "FIGURE";
 
 							// 			break;
 							// 		}
@@ -1157,8 +1194,8 @@ export async function parseDom(dom, mode) {
 						// notebox
 						case "NOTEBOX": {
 							type = "highlight";
-							tagOverride.yes = true;
-							tagOverride.to = "DIV";
+
+							tagOverride = "DIV";
 
 							try {
 								for (let i = 0; i < childElement.children.length; i++) {
@@ -1193,8 +1230,8 @@ export async function parseDom(dom, mode) {
 						// 	// photo
 						// 	if (childElement.classList.contains("picture") || childElement.querySelector("img")) {
 						// 		type = "image";
-						// 		tagOverride.yes = true;
-						// 		tagOverride.to = "FIGURE";
+
+						// 		tagOverride = "FIGURE";
 						// 		addContentKey = false;
 
 						// 		try {
@@ -1235,8 +1272,8 @@ export async function parseDom(dom, mode) {
 						// 	// video
 						// 	else if (childElement.classList.contains("video")) {
 						// 		type = "video";
-						// 		tagOverride.yes = true;
-						// 		tagOverride.to = "DIV";
+
+						// 		tagOverride = "DIV";
 						// 		addContentKey = false;
 
 						// 		try {
@@ -1300,8 +1337,8 @@ export async function parseDom(dom, mode) {
 					try {
 						let c = {};
 
-						if (tagOverride.yes) {
-							c.tag = tagOverride.to;
+						if (tagOverride !== "") {
+							c.tag = tagOverride;
 						} else {
 							c.tag = childElement.tagName;
 						}
@@ -1333,7 +1370,7 @@ export async function parseDom(dom, mode) {
 				// console.log("description: " + description);
 				// console.log("keywords: " + keywords);
 				// console.log("tags: " + JSON.stringify(tags));
-				// console.log("publish_date: " + JSON.stringify(publish_date));
+				// console.log("pubdate: " + JSON.stringify(pubdate));
 				// console.log("authors: " + JSON.stringify(authors));
 				// console.log("content: " + JSON.stringify(content));
 

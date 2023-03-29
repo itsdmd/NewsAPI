@@ -13,7 +13,6 @@ async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 	return;
 }
-
 async function test() {
 	/* #region   */
 	/* -------------- tt-vn ------------- */
@@ -28,12 +27,12 @@ async function test() {
 	/* #endregion */
 
 	// dynamically load modules
-	const cacher = await import("./scripts/scraper/cacher.js");
-	const parser = await import("./scripts/scraper/parser.js");
+	const cacher = await import("./scraper/cacher.js");
+	const parser = await import("./scraper/parser.js");
 
 	/* ------- initialize database ------ */
 	await cacher.cacheOne(
-		"https://thanhnien.vn/4-nu-tiep-vien-hang-khong-duoc-tra-tu-do-nhung-van-phai-hop-tac-dieu-tra-185230323193115031.htm",
+		"https://thanhnien.vn/viet-nam-len-tieng-ve-thong-tin-tau-trung-quoc-di-vao-vung-dac-quyen-kinh-te-185230328115948966.htm",
 		"tn-vn",
 		false
 	);
@@ -42,5 +41,6 @@ async function test() {
 
 // await test();
 
-await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 5);
+await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 2);
+
 process.exit(0);

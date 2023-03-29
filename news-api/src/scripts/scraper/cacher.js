@@ -11,6 +11,7 @@ dotenv.config();
 
 if (process.env.DATABASE_URL === undefined || process.env.DATABASE_URL === "") {
 	console.log("\n[cacher.js] Error: DATABASE_URL is not defined.");
+	process.exit(1);
 }
 
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });

@@ -2,7 +2,6 @@
 console.log("\n[parser.js]");
 
 import * as dotenv from "dotenv";
-
 import jsdom from "jsdom";
 import mongoose from "mongoose";
 
@@ -773,42 +772,6 @@ export async function parseDom(dom, mode) {
 								break;
 							}
 
-							// older photo
-							// else if (childElement.querySelector("table").querySelector("img")) {
-							// 	type = "image";
-							// 	tagOverride.yes = true;
-							// 	tagOverride.to = "FIGURE";
-							// 	addContentKey = false;
-
-							// 	try {
-							// 		attr.src = childElement.querySelector("table").querySelector("img").getAttribute("src");
-							// 	} catch (e) {
-							// 		console.log("\n[parser:parseDom] content/DIV/image/src");
-							// 	}
-
-							// 	try {
-							// 		attr.caption = childElement
-							// 			.querySelector("table")
-							// 			.querySelector("img")
-							// 			.getAttribute("alt")
-							// 			.textContent.replace(/\n/g, "")
-							// 			.trim();
-							// 	} catch (e) {
-							// 		try {
-							// 			attr.caption = childElement.querySelector("table").textContent.replace(/\n/g, "").trim();
-							// 		} catch (e) {
-							// 			// console.log("\n[parser:parseDom] content/DIV/image/caption");
-							// 		}
-							// 	}
-
-							// 	attributes.push({
-							// 		src: attr.src,
-							// 		caption: attr.caption,
-							// 	});
-
-							// 	break;
-							// }
-
 							// highlight
 							// NOTE: <a> tags within the highlight are very rare and will be ignored
 							else if (childElement.getAttribute("type") === "boxhighlight") {
@@ -887,6 +850,45 @@ export async function parseDom(dom, mode) {
 								break;
 							}
 
+							/* ------------- legacy ------------- */
+							//! only uncomment if you want to parse older articles
+							/* #region   */
+							// older photo
+							// else if (childElement.querySelector("table").querySelector("img")) {
+							// 	type = "image";
+							// 	tagOverride.yes = true;
+							// 	tagOverride.to = "FIGURE";
+							// 	addContentKey = false;
+
+							// 	try {
+							// 		attr.src = childElement.querySelector("table").querySelector("img").getAttribute("src");
+							// 	} catch (e) {
+							// 		console.log("\n[parser:parseDom] content/DIV/image/src");
+							// 	}
+
+							// 	try {
+							// 		attr.caption = childElement
+							// 			.querySelector("table")
+							// 			.querySelector("img")
+							// 			.getAttribute("alt")
+							// 			.textContent.replace(/\n/g, "")
+							// 			.trim();
+							// 	} catch (e) {
+							// 		try {
+							// 			attr.caption = childElement.querySelector("table").textContent.replace(/\n/g, "").trim();
+							// 		} catch (e) {
+							// 			// console.log("\n[parser:parseDom] content/DIV/image/caption");
+							// 		}
+							// 	}
+
+							// 	attributes.push({
+							// 		src: attr.src,
+							// 		caption: attr.caption,
+							// 	});
+
+							// 	break;
+							// }
+
 							// older highlight
 							// else if (childElement.querySelector("div.quote")) {
 							// 	type = "highlight";
@@ -935,8 +937,6 @@ export async function parseDom(dom, mode) {
 							// 	break;
 							// }
 
-							/* ------------- legacy ------------- */
-							/* #region   */
 							// plain text
 							// else if (childElement.childElementCount === 0 && childElement.textContent.replace(/\n/g, "").trim().length > 0) {
 							// 	type = "text";
@@ -1154,7 +1154,41 @@ export async function parseDom(dom, mode) {
 							break;
 						}
 
-						// legacy photo/video
+						// notebox
+						case "NOTEBOX": {
+							type = "highlight";
+							tagOverride.yes = true;
+							tagOverride.to = "DIV";
+
+							try {
+								for (let i = 0; i < childElement.children.length; i++) {
+									if (childElement.children[i].querySelector("A")) {
+										let allA = childElement.children[i].querySelectorAll("A");
+										allA.forEach((a) => {
+											attributes.push({
+												tag: a.tagName,
+												content: a.textContent.replace(/\n/g, "").trim(),
+											});
+										});
+									} else {
+										attributes.push({
+											tag: childElement.children[i].tagName,
+											content: childElement.children[i].textContent.replace(/\n/g, "").trim(),
+										});
+									}
+								}
+
+								break;
+							} catch (e) {
+								console.log("\n[parser:parseDom] content/NOTEBOX");
+							}
+
+							break;
+						}
+
+						/* ------- legacy photo/video ------- */
+						//! only uncomment if you want to parse legacy photo/video
+						/* #region   */
 						// case "TABLE": {
 						// 	// photo
 						// 	if (childElement.classList.contains("picture") || childElement.querySelector("img")) {
@@ -1252,38 +1286,7 @@ export async function parseDom(dom, mode) {
 
 						// 	break;
 						// }
-
-						// highlight
-						case "NOTEBOX": {
-							type = "highlight";
-							tagOverride.yes = true;
-							tagOverride.to = "DIV";
-
-							try {
-								for (let i = 0; i < childElement.children.length; i++) {
-									if (childElement.children[i].querySelector("A")) {
-										let allA = childElement.children[i].querySelectorAll("A");
-										allA.forEach((a) => {
-											attributes.push({
-												tag: a.tagName,
-												content: a.textContent.replace(/\n/g, "").trim(),
-											});
-										});
-									} else {
-										attributes.push({
-											tag: childElement.children[i].tagName,
-											content: childElement.children[i].textContent.replace(/\n/g, "").trim(),
-										});
-									}
-								}
-
-								break;
-							} catch (e) {
-								console.log("\n[parser:parseDom] content/NOTEBOX");
-							}
-
-							break;
-						}
+						/* #endregion */
 
 						default:
 							// console.log("\n[parser:parseDom] Unknown tag: " + childElement.tagName);

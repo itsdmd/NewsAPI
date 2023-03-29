@@ -99,7 +99,7 @@ export async function parseDom(dom, mode) {
 						tag.getAttribute("title");
 
 						tags.push({
-							title: tag.textContent.replace(/\n/g, "").trim(),
+							title: tag.textContent.replace(/\n/g, "").trim().toLowerCase(),
 							url: "https://tuoitre.vn" + tag.getAttribute("href"),
 						});
 					});
@@ -191,35 +191,40 @@ export async function parseDom(dom, mode) {
 						// text
 						case "H2":
 						case "P": {
+							if (childElement.textContent.length === 0) {
+								continue;
+							}
+
+							type = "text";
+
 							if (childElement.childElementCount) {
-								type = "text";
-								if (childElement.textContent.length === 0) {
-									break;
-								}
-
 								if (childElement.querySelectorAll("BR").length === childElement.childElementCount) {
-									type = "text";
 									break;
 								}
 
-								for (let j = 0; j < childElement.childElementCount; j++) {
-									if (childElement.childNodes[j].tagName === "A") {
+								const allAChildren = childElement.querySelectorAll("A");
+								if (allAChildren.length > 0) {
+									type = "texta";
+
+									allAChildren.forEach((a) => {
 										try {
 											attr = {
-												tag: childElement.childNodes[j].tagName,
-												content: childElement.childNodes[j].textContent.replace(/\n/g, "").trim(),
-												href: childElement.childNodes[j].getAttribute("href"),
+												tag: a.tagName,
+												content: a.textContent.replace(/\n/g, "").trim(),
+												href: a.getAttribute("href"),
 											};
 										} catch (e) {
 											console.log("\n[parser:parseDom] Error parsing content/A");
 										}
+									});
 
-										try {
-											attributes.push(attr);
-										} catch (e) {
-											console.log("\n[parser:parseDom] Error parsing content/A/push");
-										}
+									try {
+										attributes.push(attr);
+									} catch (e) {
+										console.log("\n[parser:parseDom] Error parsing content/A/push");
 									}
+
+									break;
 								}
 							}
 
@@ -382,58 +387,45 @@ export async function parseDom(dom, mode) {
 						}
 
 						default:
-							if (childElement.textContent.trim() !== "") {
-								content.push({
-									tag: "P",
-									content: childElement.textContent.trim(),
-								});
-								// continue;
-							}
-
-							// console.log("\n[parser:parseDom] Unknown tag: " + childNode.tagName);
 							continue;
 					}
 
+					if (type === "") {
+						continue;
+					}
+
 					try {
-						// video
-						if (childElement.tagName === "FIGURE" || childElement.getAttribute("type") === "VideoStream") {
-							content.push({
-								tag: childElement.tagName,
-								attributes: attributes,
-							});
+						let c = {};
+
+						if (tagOverride !== "") {
+							c.tag = tagOverride;
+						} else {
+							c.tag = childElement.tagName;
 						}
 
-						// photo in table (old)
-						else if (childElement.tagName === "TABLE" && attributes.length > 0) {
-							content.push({
-								tag: "FIGURE",
-								attributes: attributes,
-							});
+						c.type = type;
+
+						if (addContentKey === false) {
+							c.attributes = attributes;
+						} else if (attributes.length === 0) {
+							c.content = childElement.textContent.replace(/\n/g, "").trim();
+						} else {
+							c.content = childElement.textContent.replace(/\n/g, "").trim();
+							c.attributes = attributes;
 						}
 
-						// blank attributes
-						else if (attributes.length === 0) {
-							content.push({
-								tag: childElement.tagName,
-								content: childElement.textContent.trim(),
-							});
-						}
-
-						// other
-						else {
-							content.push({
-								tag: childElement.tagName,
-								content: childElement.textContent.trim(),
-								attributes: attributes,
-							});
-						}
+						content.push(c);
 					} catch (e) {
 						try {
+							if (childElement.textContent.trim() === "") {
+								continue;
+							}
+
 							content.push({
 								tag: "P",
+								type: "text",
 								content: childElement.textContent.trim(),
 							});
-							continue;
 						} catch (e) {
 							console.log("\n[parser:parseDom] Error pushing to content: " + e);
 						}
@@ -676,7 +668,7 @@ export async function parseDom(dom, mode) {
 
 							type = "text";
 							if (childElement.textContent.length === 0) {
-								break;
+								continue;
 							}
 
 							if (childElement.childElementCount) {

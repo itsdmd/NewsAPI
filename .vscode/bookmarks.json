@@ -9,82 +9,82 @@
 					"label": "tt/txt"
 				},
 				{
-					"line": 228,
+					"line": 233,
 					"column": 14,
 					"label": "tt/fig"
 				},
 				{
-					"line": 275,
+					"line": 280,
 					"column": 9,
 					"label": "tt/div/vid"
 				},
 				{
-					"line": 307,
+					"line": 312,
 					"column": 10,
 					"label": "tt/div/pht"
 				},
 				{
-					"line": 355,
+					"line": 360,
 					"column": 10,
 					"label": "tt/tbl/pht"
 				},
 				{
-					"line": 473,
+					"line": 465,
 					"column": 3,
 					"label": "tn"
 				},
 				{
-					"line": 666,
+					"line": 658,
 					"column": 6,
 					"label": "tn/txt"
 				},
 				{
-					"line": 730,
+					"line": 722,
 					"column": 6,
 					"label": "tn/fig"
 				},
 				{
-					"line": 770,
+					"line": 762,
 					"column": 6,
 					"label": "tn/div"
 				},
 				{
-					"line": 772,
+					"line": 764,
 					"column": 7,
 					"label": "tn/div/vid"
 				},
 				{
-					"line": 812,
+					"line": 804,
 					"column": 7,
 					"label": "tn/div/hl"
 				},
 				{
-					"line": 865,
+					"line": 857,
 					"column": 7,
 					"label": "tn/div/quo"
 				},
 				{
-					"line": 975,
+					"line": 967,
 					"column": 7,
 					"label": "tn/div/leg/txt"
 				},
 				{
-					"line": 986,
+					"line": 978,
 					"column": 7,
 					"label": "tn/div/leg/txta"
 				},
 				{
-					"line": 1037,
+					"line": 1029,
 					"column": 9,
 					"label": "tn/div/leg/pht"
 				},
 				{
-					"line": 1088,
+					"line": 1080,
 					"column": 9,
 					"label": "tn/div/leg/vid"
 				},
 				{
-					"line": 1133,
+					"line": 1125,
 					"column": 9,
 					"label": "tn/div/leg/hl"
 				}

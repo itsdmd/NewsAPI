@@ -167,10 +167,10 @@ export async function parseDom(dom, mode) {
 
 				// audio
 				let audioplayer = dom.querySelector("div.audioplayer");
-				if (audioplayer !== null && audioplayer !== undefined) {
+				if (audioplayer) {
 					content.push({
-						tag: audioplayer.tagName,
-						content: "audioplayer",
+						tag: "DIV",
+						type: "audio",
 						attributes: {
 							src: audioplayer.getAttribute("data-file"),
 						},

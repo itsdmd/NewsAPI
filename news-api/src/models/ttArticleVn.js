@@ -67,7 +67,7 @@ const ttVnArticleSchema = new Schema({
 		},
 		authors: [
 			{
-				title: {
+				name: {
 					type: String,
 				},
 				url: {

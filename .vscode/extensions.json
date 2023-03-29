@@ -1,3 +1,10 @@
 {
-	"recommendations": ["mongodb.mongodb-vscode", "alefragnani.bookmarks", "esbenp.prettier-vscode", "maptz.regionfolder"]
+	"recommendations": [
+		"alefragnani.bookmarks",
+		"esbenp.prettier-vscode",
+		"humao.rest-client",
+		"maptz.regionfolder",
+		"mongodb.mongodb-vscode",
+		"rangav.vscode-thunder-client"
+	]
 }

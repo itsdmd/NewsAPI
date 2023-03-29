@@ -141,6 +141,13 @@ export async function parseDom(dom, mode) {
 				} catch (e) {
 					console.log("\n[parser:parseDom] pubdate/minute");
 				}
+
+				try {
+					pubdate.isodate = pubdate.year + "-" + pubdate.month + "-" + pubdate.day + "T" + pubdate.hour + ":" + pubdate.minute + ":00+07:00";
+					pubdate.isodate = new Date(pubdate.isodate).toISOString();
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/isodate");
+				}
 				/* #endregion */
 
 				// authors

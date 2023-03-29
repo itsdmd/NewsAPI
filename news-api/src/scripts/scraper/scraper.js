@@ -18,6 +18,8 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 		case "tt-vn": {
 			let i = limit;
 
+			console.log("\n[scraper:scrape] Page " + (limit - i + 1) + " / " + limit);
+
 			while (i !== 0) {
 				try {
 					let html = await fetcher.fetchHttpText(startUrl);

@@ -75,4 +75,14 @@ GET https://thanhnien.vn/da-den-luc-rut-kinh-nghiem-thuc-su-185418775.htm
 
 ###
 
-get https://thanhnien.vn/pho-thu-tuong-trinh-dinh-dung-thi-sat-vung-sat-lo-vam-nao-185664553.htm
+GET https://vnexpress.net/thoi-su-p2
+
+###
+
+# Article
+https://vnexpress.net/kiem-tra-toan-quoc-ve-quan-ly-tien-cong-duc-4578636.html
+
+###
+
+# Photo
+GET https://vnexpress.net/cao-toc-dau-giay-phan-thiet-truoc-mot-thang-thong-xe-4586719.html

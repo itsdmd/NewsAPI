@@ -638,18 +638,20 @@ export async function parseDom(dom, mode) {
 				let contentContainer = dom.querySelectorAll("div.detail-content > *");
 
 				for (let i = 0; i < contentContainer.length; i++) {
+					const childElement = contentContainer[i];
+
 					/* #region   */
 					// remove all \n and trim. if empty, continue
-					if (contentContainer[i].textContent.replace(/\n/g, "").trim().length === 0) {
+					if (childElement.textContent.replace(/\n/g, "").trim().length === 0) {
 						continue;
 					}
 
 					// for older articles, there's a sneaky script div
-					if (contentContainer[i].textContent.includes("function")) {
+					if (childElement.textContent.includes("function")) {
 						continue;
 					}
 					// and usually the <strong> tag is the author name so break
-					if (contentContainer[i].childNodes[0].tagName === "STRONG") {
+					if (childElement.childNodes[0].tagName === "STRONG") {
 						break;
 					}
 					/* #endregion */
@@ -659,8 +661,6 @@ export async function parseDom(dom, mode) {
 					let tagOverride = "";
 					let attributes = [];
 					let attr = {};
-
-					let childElement = contentContainer[i];
 
 					switch (childElement.tagName) {
 						// text
@@ -1376,7 +1376,7 @@ export async function parseDom(dom, mode) {
 				/* #endregion */
 
 				// create new ttVnArticle
-				const TnVnArticle = {
+				const tnVnArticle = {
 					metadata: {
 						id: id,
 						url: url,
@@ -1391,7 +1391,605 @@ export async function parseDom(dom, mode) {
 					content: content,
 				};
 
-				return TnVnArticle;
+				return tnVnArticle;
+			}
+
+			/* ------------ VnExpress ----------- */
+			case "vnx-vn-feed": {
+				const feedEntries = [];
+
+				dom.querySelectorAll("article.item-news").forEach((itemNews) => {
+					let item = {};
+					item.url = itemNews.querySelector("a").getAttribute("href");
+
+					if (itemNews.querySelector("svg.ic-video")) {
+						// VnExpress use blob and m3u8 for video streaming so it's not possible to get the video
+						return;
+					} else if (itemNews.querySelector("svg.ic-camera")) {
+						item.type = "gallery";
+					} else {
+						item.type = "article";
+					}
+
+					if (item !== null && item !== undefined) {
+						feedEntries.push(item);
+					}
+				});
+
+				return feedEntries;
+			}
+
+			case "vnx-vn-article": {
+				/* ------------ metadata ------------ */
+				/* #region   */
+				// id
+				let id = "";
+				try {
+					id = dom.querySelector("meta[name='tt_article_id']").getAttribute("content");
+				} catch (e) {
+					console.log("\n[parser:parseDom] id: " + e);
+				}
+
+				// url
+				let url = "";
+				try {
+					url = dom.querySelector("meta[property='og:url']").getAttribute("content");
+				} catch (e) {
+					console.log("\n[parser:parseDom] url: " + e);
+				}
+
+				// category
+				let categories = [];
+				try {
+					const ids = dom.querySelector("meta[name='tt_list_folder']").getAttribute("content").split(",");
+					const names = dom.querySelector("meta[name='tt_list_folder_name']").getAttribute("content").split(",");
+					for (let i = 0; i < ids.length; i++) {
+						categories.push({ title: names[i], id: ids[i] });
+					}
+				} catch (e) {
+					console.log("\n[parser:parseDom] categories: " + e);
+				}
+
+				// title
+				let title = "";
+				try {
+					title = dom.querySelector("meta[property='og:title']").getAttribute("content").trim();
+				} catch (e) {
+					console.log("\n[parser:parseDom] title: " + e);
+				}
+
+				// description
+				let description = "";
+				try {
+					description = dom.querySelector("meta[property='og:description']").getAttribute("content").trim();
+				} catch (e) {
+					console.log("\n[parser:parseDom] description: " + e);
+				}
+
+				// keywords
+				let keywords = [];
+				try {
+					keywords = dom.querySelector("meta[property='article:tag']").getAttribute("content").split(",");
+
+					keywords = keywords.map((keyword) => keyword.trim().toLowerCase());
+				} catch (error) {
+					console.log("\n[parser:parseDom] Error parsing keywords: " + error);
+				}
+
+				// pubdate
+				/* #region   */
+				let pubdate = {};
+				try {
+					pubdate.isodate = dom.querySelector("meta[name='pubdate']").getAttribute("content");
+					pubdate.isodate = new Date(pubdate.isodate).toISOString();
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/isodate");
+				}
+				try {
+					pubdate.year = pubdate.isodate.split("T")[0].split("-")[0];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/year");
+				}
+				try {
+					pubdate.month = pubdate.isodate.split("T")[0].split("-")[1];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/month");
+				}
+				try {
+					pubdate.day = pubdate.isodate.split("T")[0].split("-")[2];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/day");
+				}
+				try {
+					pubdate.hour = pubdate.isodate.split("T")[1].split(":")[0];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/hour");
+				}
+				try {
+					pubdate.minute = pubdate.isodate.split("T")[1].split(":")[1];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/minute");
+				}
+				/* #endregion */
+
+				// authors
+				let authors = [];
+				try {
+					let authorsString = "";
+
+					if (dom.querySelector("p.author_mail")) {
+						authorsString = dom.querySelector("p.author_mail").textContent.trim();
+					} else if (dom.querySelector("p.author")) {
+						authorsString = dom.querySelector("p.author").textContent.trim();
+					} else if (dom.querySelector("p[style='text-align:right;']")) {
+						authorsString = dom.querySelector("p[style='text-align:right;']").textContent.trim();
+					} else if (dom.querySelector("p[align='right']")) {
+						authorsString = dom.querySelector("p[align='right']").textContent.trim();
+					}
+					if (authorsString.length > 0) {
+						if (authorsString.includes(" - ")) {
+							authorsString.split(" - ").forEach((author) => {
+								authors.push({
+									name: author.trim(),
+								});
+							});
+						} else {
+							authors.push({
+								name: authorsString.trim(),
+							});
+						}
+					} else {
+						console.log("\n[parser:parseDom] authors: authorsString is empty");
+					}
+				} catch (e) {
+					console.log("\n[parser:parseDom] authors: " + e);
+				}
+				/* #endregion */
+
+				/* ------------- content ------------ */
+				let content = [];
+				let contentContainer = dom.querySelectorAll("article.fck_detail > *");
+
+				for (let i = 0; i < contentContainer.length; i++) {
+					const childElement = contentContainer[i];
+
+					/* #region   */
+					// remove all \n and trim. if empty, continue
+					if (childElement.textContent.replace(/\n/g, "").trim().length === 0) {
+						continue;
+					}
+
+					// skip related news
+					if (childElement.tagName === "DIV" && childElement.classList.contains("box-tinlienquanv2")) {
+						continue;
+					}
+
+					// skip authors' name
+					if (childElement.tagName === "P" && (childElement.getAttribute("align") || childElement.getAttribute("style"))) {
+						continue;
+					}
+					/* #endregion */
+
+					let type = "";
+					let addContentKey = true;
+					let tagOverride = "";
+					let attributes = [];
+					let attr = {};
+
+					switch (childElement.tagName) {
+						// text
+						case "H2":
+						case "P": {
+							// skip right-aligned text since it's the author's name in older articles
+							try {
+								if (childElement.getAttribute("align") === "right") {
+									continue;
+								}
+							} catch (e) {}
+
+							type = "text";
+							if (childElement.textContent.length === 0) {
+								continue;
+							}
+
+							if (childElement.childElementCount) {
+								if (childElement.querySelectorAll("BR").length === childElement.childElementCount) {
+									type = "text";
+									break;
+								}
+
+								type = "texta";
+								for (let j = 0; j < childElement.childElementCount; j++) {
+									if (childElement.children[j].tagName === "A") {
+										try {
+											attr.tag = childElement.children[j].tagName;
+										} catch (e) {
+											console.log("\n[parser:parseDom] content/P/A/tag");
+										}
+
+										try {
+											attr.content = childElement.children[j].textContent.trim();
+
+											if (attr.content.length === 0) {
+												continue;
+											}
+										} catch (e) {
+											console.log("\n[parser:parseDom] content/P/A/content");
+										}
+
+										try {
+											attr.href = "https://thanhnien.vn" + childElement.children[j].getAttribute("href");
+										} catch (e) {
+											console.log("\n[parser:parseDom] content/P/A/href");
+
+											attr.href = null;
+										}
+
+										try {
+											attributes.push({
+												tag: attr.tag,
+												content: attr.content,
+												href: attr.href,
+											});
+										} catch (e) {
+											console.log("\n[parser:parseDom] content/P/A/push");
+										}
+									}
+								}
+							}
+
+							break;
+						}
+
+						// photo
+						case "FIGURE": {
+							type = "image";
+							addContentKey = false;
+
+							try {
+								attr.src = childElement.querySelector("meta[itemprop='url']").getAttribute("content");
+							} catch (e) {
+								console.log("\n[parser:parseDom] content/FIGURE/src");
+
+								attr.src = "";
+							}
+
+							// Lễ hội xuân Yên Tử, TP Uông Bí, Quảng Ninh, khai mạc sáng mùng 10 tháng giêng (31/1/2023). Ảnh: Giang Huy
+
+							try {
+								attr.caption = childElement.querySelector("figcaption").textContent.replace(/\n/g, "").split("Ảnh:")[0].trim();
+							} catch (e) {
+								// console.log("\n[parser:parseDom] content/FIGURE/caption");
+							}
+
+							try {
+								attr.author = childElement.querySelector("figcaption").textContent.replace(/\n/g, "").split("Ảnh:")[1].trim();
+							} catch (e) {
+								// console.log("\n[parser:parseDom] content/FIGURE/author");
+							}
+
+							try {
+								attributes.push({
+									src: attr.src,
+									caption: attr.caption,
+									author: attr.author,
+								});
+							} catch (e) {
+								console.log("\n[parser:parseDom] content/FIGURE/push");
+							}
+
+							break;
+						}
+
+						// content
+						case "DIV": {
+							// highlight
+							// NOTE: <a> tags within the highlight are very rare and will be ignored
+							if (childElement.getAttribute("class") === "box_brief_info") {
+								type = "highlight";
+								addContentKey = false;
+
+								let highlightContent = [];
+
+								try {
+									childElement.childNodes.forEach((node) => {
+										if (node.textContent.replace(/\n/g, "").trim().length > 0) {
+											try {
+												highlightContent.push({
+													tag: node.tagName,
+													content: node.textContent.replace(/\n/g, "").trim(),
+												});
+											} catch (e) {
+												console.log("\n[parser:parseDom] content/DIV/box_brief_info/" + node.tagName);
+											}
+										}
+									});
+								} catch (e) {
+									console.log("\n[parser:parseDom] content/DIV/box_brief_info");
+								}
+
+								attributes.push({
+									content: highlightContent,
+								});
+
+								break;
+							}
+
+							break;
+						}
+
+						default:
+							// console.log("\n[parser:parseDom] Unknown tag: " + childElement.tagName);
+							continue;
+					}
+
+					if (type === "") {
+						continue;
+					}
+
+					try {
+						let c = {};
+
+						if (tagOverride !== "") {
+							c.tag = tagOverride;
+						} else {
+							c.tag = childElement.tagName;
+						}
+
+						c.type = type;
+
+						if (addContentKey === false) {
+							c.attributes = attributes;
+						} else if (attributes.length === 0) {
+							c.content = childElement.textContent.replace(/\n/g, "").trim();
+						} else {
+							c.content = childElement.textContent.replace(/\n/g, "").trim();
+							c.attributes = attributes;
+						}
+
+						content.push(c);
+					} catch (e) {
+						console.log("\n[parser:parseDom] Error pushing to content: " + e);
+					}
+				}
+
+				/* #region   */
+
+				// console.log("id: " + id);
+				// console.log("url: " + url);
+				// console.log("type: " + type);
+				// console.log("category: " + category);
+				// console.log("title: " + title);
+				// console.log("description: " + description);
+				// console.log("keywords: " + keywords);
+				// console.log("tags: " + JSON.stringify(tags));
+				// console.log("pubdate: " + JSON.stringify(pubdate));
+				// console.log("authors: " + JSON.stringify(authors));
+				// console.log("content: " + JSON.stringify(content));
+
+				/* #endregion */
+
+				// create new vnxVnArticle
+				const vnxVnArticle = {
+					metadata: {
+						id: id,
+						url: url,
+						categories: categories,
+						title: title,
+						description: description,
+						keywords: keywords,
+						pubdate: pubdate,
+						authors: authors,
+					},
+					content: content,
+				};
+
+				return vnxVnArticle;
+			}
+
+			case "vnx-vn-gallery": {
+				/* ------------ metadata ------------ */
+				/* #region   */
+				// id
+				let id = "";
+				try {
+					id = dom.querySelector("meta[name='tt_article_id']").getAttribute("content");
+				} catch (e) {
+					console.log("\n[parser:parseDom] id: " + e);
+				}
+
+				// url
+				let url = "";
+				try {
+					url = dom.querySelector("meta[property='og:url']").getAttribute("content");
+				} catch (e) {
+					console.log("\n[parser:parseDom] url: " + e);
+				}
+
+				// category
+				let categories = [];
+				try {
+					const ids = dom.querySelector("meta[name='tt_list_folder']").getAttribute("content").split(",");
+					const names = dom.querySelector("meta[name='tt_list_folder_name']").getAttribute("content").split(",");
+					for (let i = 0; i < ids.length; i++) {
+						categories.push({ title: names[i], id: ids[i] });
+					}
+				} catch (e) {
+					console.log("\n[parser:parseDom] categories: " + e);
+				}
+
+				// title
+				let title = "";
+				try {
+					title = dom.querySelector("meta[property='og:title']").getAttribute("content").trim();
+				} catch (e) {
+					console.log("\n[parser:parseDom] title: " + e);
+				}
+
+				// description
+				let description = "";
+				try {
+					description = dom.querySelector("meta[property='og:description']").getAttribute("content").trim();
+				} catch (e) {
+					console.log("\n[parser:parseDom] description: " + e);
+				}
+
+				// keywords
+				let keywords = [];
+				try {
+					keywords = dom.querySelector("meta[property='article:tag']").getAttribute("content").split(",");
+
+					keywords = keywords.map((keyword) => keyword.trim().toLowerCase());
+				} catch (error) {
+					console.log("\n[parser:parseDom] Error parsing keywords: " + error);
+				}
+
+				// pubdate
+				/* #region   */
+				let pubdate = {};
+				try {
+					pubdate.isodate = dom.querySelector("meta[name='pubdate']").getAttribute("content");
+					pubdate.isodate = new Date(pubdate.isodate).toISOString();
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/isodate");
+				}
+				try {
+					pubdate.year = pubdate.isodate.split("T")[0].split("-")[0];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/year");
+				}
+				try {
+					pubdate.month = pubdate.isodate.split("T")[0].split("-")[1];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/month");
+				}
+				try {
+					pubdate.day = pubdate.isodate.split("T")[0].split("-")[2];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/day");
+				}
+				try {
+					pubdate.hour = pubdate.isodate.split("T")[1].split(":")[0];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/hour");
+				}
+				try {
+					pubdate.minute = pubdate.isodate.split("T")[1].split(":")[1];
+				} catch (e) {
+					console.log("\n[parser:parseDom] pubdate/minute");
+				}
+				/* #endregion */
+
+				// authors
+				let authors = [];
+				try {
+					let authorsString = "";
+
+					if (dom.querySelector("p.author_mail")) {
+						authorsString = dom.querySelector("p.author_mail").textContent.trim();
+					} else if (dom.querySelector("p.author")) {
+						authorsString = dom.querySelector("p.author").textContent.trim();
+					} else if (dom.querySelector("p[style='text-align:right;']")) {
+						authorsString = dom.querySelector("p[style='text-align:right;']").textContent.trim();
+					} else if (dom.querySelector("p[align='right']")) {
+						authorsString = dom.querySelector("p[align='right']").textContent.trim();
+					}
+					if (authorsString.length > 0) {
+						if (authorsString.includes(" - ")) {
+							authorsString.split(" - ").forEach((author) => {
+								authors.push({
+									name: author.trim(),
+								});
+							});
+						} else {
+							authors.push({
+								name: authorsString.trim(),
+							});
+						}
+					} else {
+						console.log("\n[parser:parseDom] authors: authorsString is empty");
+					}
+				} catch (e) {
+					console.log("\n[parser:parseDom] authors: " + e);
+				}
+				/* #endregion */
+
+				/* ------------- content ------------ */
+				let content = [];
+				let contentContainer = dom.querySelectorAll("article.fck_detail > div.item_slide_show");
+
+				for (let i = 0; i < contentContainer.length; i++) {
+					const childElement = contentContainer[i];
+
+					let c = {};
+					let attributes = [];
+					let attr = {};
+
+					try {
+						if (childElement.querySelector("[data-src]")) {
+							c.tag = "FIGURE";
+							c.type = "image";
+							attr.src = childElement.querySelector("[data-src]").getAttribute("data-src");
+							attr.caption = [];
+
+							let contentBlock = {};
+							if (childElement.querySelector("div.desc_cation")) {
+								let children = childElement.querySelector("div.desc_cation").children;
+								for (const child of children) {
+									contentBlock.tag = child.tagName;
+									contentBlock.type = "text";
+									contentBlock.content = child.textContent.trim();
+
+									attr.caption.push(contentBlock);
+								}
+							}
+
+							attributes.push(attr);
+						}
+					} catch (e) {
+						console.log("\n[parser:parseDom] content: " + e);
+					}
+
+					try {
+						c.attributes = attributes;
+						content.push(c);
+					} catch (e) {
+						console.log("\n[parser:parseDom] Error pushing to content: " + e);
+					}
+				}
+
+				/* #region   */
+
+				// console.log("id: " + id);
+				// console.log("url: " + url);
+				// console.log("type: " + type);
+				// console.log("category: " + category);
+				// console.log("title: " + title);
+				// console.log("description: " + description);
+				// console.log("keywords: " + keywords);
+				// console.log("tags: " + JSON.stringify(tags));
+				// console.log("pubdate: " + JSON.stringify(pubdate));
+				// console.log("authors: " + JSON.stringify(authors));
+				// console.log("content: " + JSON.stringify(content));
+
+				/* #endregion */
+
+				// create new vnxVnArticle
+				const vnxVnArticle = {
+					metadata: {
+						id: id,
+						url: url,
+						categories: categories,
+						title: title,
+						description: description,
+						keywords: keywords,
+						pubdate: pubdate,
+						authors: authors,
+					},
+					content: content,
+				};
+
+				return vnxVnArticle;
 			}
 
 			default: {
@@ -1461,9 +2059,9 @@ export async function parseCache(mode, skipped = false) {
 
 									currentCachedDocs--;
 
-									await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
-										console.log("\n[parser:parseCache] Added back to cache");
-									});
+									// await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+									// 	console.log("\n[parser:parseCache] Added back to cache");
+									// });
 								});
 						})
 						.catch(async (err) => {
@@ -1535,9 +2133,67 @@ export async function parseCache(mode, skipped = false) {
 								});
 							currentCachedDocs--;
 
-							await cacher.cacheOne(cachedDoc.url, mode, true).then(() => {
-								console.log("\n[parser:parseCache] Added back to cache");
-							});
+							// await cacher.cacheOne(cachedDoc.url, mode, true).then(() => {
+							// 	console.log("\n[parser:parseCache] Added back to cache");
+							// });
+
+							return;
+						});
+
+					break;
+				}
+
+				case "vnx-vn-article":
+				case "vnx-vn-gallery": {
+					await parseDom(httpDoc, mode)
+						.then(async (parsedHttp) => {
+							// console.log("\n[parser:parseCache] Parsed successfully");
+
+							await transactor
+								.addVnxVnArticle(parsedHttp)
+								.then(async () => {
+									// delete cachedDoc;
+									await cacheModel.deleteOne({ _id: cachedDoc._id }).catch((err) => {
+										console.log("\n[parser:parseCache] Error when deleting cachedDoc: " + err);
+										return;
+									});
+									// .finally(console.log("\n[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id));
+									currentCachedDocs--;
+								})
+								.catch(async (err) => {
+									console.log("\n[parser:parseCache] Error when call transactor: " + err);
+
+									await cacheModel
+										.deleteOne({ _id: cachedDoc._id })
+										// .then(console.log("\n[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+										.catch(async (err) => {
+											console.log("\n[parser:parseCache] Error when deleting cachedDoc: " + err);
+
+											return;
+										});
+
+									currentCachedDocs--;
+
+									// await cacher.cacheOne(cachedDoc.url, "tt-vn", true).then(() => {
+									// 	console.log("\n[parser:parseCache] Added back to cache");
+									// });
+								});
+						})
+						.catch(async (err) => {
+							console.log("\n[parser:parseCache] Error when parsing cachedDoc: " + err);
+
+							await cacheModel
+								.deleteOne({ _id: cachedDoc._id })
+								// .then(console.log("\n[parser:parseCache] Deleted cachedDoc: " + cachedDoc._id))
+								.catch((err) => {
+									console.log("\n[parser:parseCache] Error when deleting cachedDoc: " + err);
+									return;
+								});
+							currentCachedDocs--;
+
+							// await cacher.cacheOne(cachedDoc.url, mode, true).then(() => {
+							// 	console.log("\n[parser:parseCache] Added back to cache");
+							// });
 
 							return;
 						});

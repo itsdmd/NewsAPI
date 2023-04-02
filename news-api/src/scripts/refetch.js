@@ -14,30 +14,8 @@ async function scrape(mode, baseUrl, startUrl, limit = 1) {
 	return;
 }
 
-async function test() {
-	/* #region   */
-	/* -------------- tt-vn ------------- */
-	// https://tuoitre.vn/timeline/3/trang-1.htm
-	// 		3:news
-	// 		11:business
-
-	/* -------------- tn-vn ------------- */
-	// https://thanhnien.vn/timelinelist/1854/1.htm
-	// 		1854:news
-	// 		18549:business
-	/* #endregion */
-
-	// dynamically load modules
-	const cacher = await import("./scraper/cacher.js");
-	const parser = await import("./scraper/parser.js");
-
-	await cacher.cacheOne("", "tt-vn", false);
-	await parser.parseCache("tt-vn");
-}
-
-// await test();
-
-await scrape("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 2);
-await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 2);
+await scrape("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 1);
+await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 1);
+await scraper.scrape("vnx-vn", "https://vnexpress.net/thoi-su", "https://vnexpress.net/thoi-su-p1", 1);
 
 process.exit(0);

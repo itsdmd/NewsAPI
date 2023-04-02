@@ -9,7 +9,11 @@ import * as parser from "./parser.js";
 export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 	if (limit === -1) {
 		// set hard limit of 5000
-		limit = 5000;
+		limit = 100;
+
+		if (mode === "vnx-vn") {
+			limit = 20;
+		}
 	}
 
 	console.log("\n[scraper:scrape] mode: " + mode + ", url: " + startUrl + ", limit: " + limit);
@@ -22,9 +26,9 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 				console.log("\n[scraper:scrape] Page " + (limit - i + 1) + " / " + limit);
 
 				try {
-					let html = await fetcher.fetchHttpText(startUrl);
+					const html = await fetcher.fetchHttpText(startUrl);
 
-					let urls = await parser.parseDom(parser.htmlToJsdom(html), "tt-vn-feed");
+					const urls = await parser.parseDom(parser.htmlToJsdom(html), "tt-vn-feed");
 
 					await cacher.cacheMany(urls, mode, false).catch((error) => {
 						console.log("\n[scraper:scrape] Error: " + error.message);
@@ -48,7 +52,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					await parser
 						.parseCache(mode)
 						.then(() => {
-							console.log("\n[scraper:scrape] Parsed cache");
+							console.log("\n[scraper:scrape] Cache parsed");
 						})
 						.catch((error) => {
 							console.log("\n[scraper:scrape] Error parsing: " + error.message);
@@ -77,7 +81,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 				console.log("\n[scraper:scrape] Page " + (limit - i + 1) + " / " + limit);
 
 				try {
-					let html = await fetcher.fetchHttpText(startUrl);
+					const html = await fetcher.fetchHttpText(startUrl);
 
 					let urls = await parser.parseDom(parser.htmlToJsdom(html), "tn-vn-feed");
 
@@ -109,7 +113,7 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					await parser
 						.parseCache(mode)
 						.then(() => {
-							console.log("\n[scraper:scrape] Parsed cache");
+							console.log("\n[scraper:scrape] Cache parsed");
 						})
 						.catch((error) => {
 							console.log("\n[scraper:scrape] Error parsing: " + error.message);
@@ -121,6 +125,91 @@ export async function scrape(mode, baseUrl, startUrl, limit = 1) {
 					let page = parseInt(startUrl.substring(startUrl.lastIndexOf("/") + 1, startUrl.lastIndexOf(".htm")));
 					page++;
 					startUrl = baseUrl + page.toString() + ".htm";
+
+					i--;
+				} catch (error) {
+					console.log("\n[scraper:scrape] Error: " + error.message);
+					return;
+				}
+			}
+
+			return;
+		}
+
+		case "vnx-vn": {
+			/* #region   */
+			// json: https://gw.vnexpress.net/ar/get_rule_2?category_id=1001001&limit=100&data_select=article_id,article_type,title,lead,share_url,thumbnail_url,original_cate,article_category,publish_time&thumb_size=300x180&thumb_quality=100
+			// category_id:
+			// 1001001: all
+			// 1001002: the gioi
+			// 1004678: chinh tri
+			// 1001007: phap luat
+			/* #endregion */
+			let i = limit;
+
+			while (i !== 0) {
+				console.log("\n[scraper:scrape] Page " + (limit - i + 1) + " / " + limit);
+
+				try {
+					const html = await fetcher.fetchHttpText(startUrl);
+
+					let feedEntries = await parser.parseDom(parser.htmlToJsdom(html), "vnx-vn-feed");
+
+					let urlsArticle = [];
+					let urlsGallery = [];
+					feedEntries.forEach((entry) => {
+						if (entry.type === "article") {
+							urlsArticle.push(entry.url);
+						} else if (entry.type === "gallery") {
+							urlsGallery.push(entry.url);
+						}
+					});
+
+					console.log("\n[scraper:scrape] Article urls: " + urlsArticle.length);
+					console.log("\n[scraper:scrape] Gallery urls: " + urlsGallery.length);
+
+					if (urlsArticle.length + urlsGallery.length === 0) {
+						console.log("\n[scraper:scrape] No urls found. Skipping...");
+						return;
+					}
+
+					/* ------------- article ------------ */
+					await cacher.cacheMany(urlsArticle, mode, false).catch((error) => {
+						console.log("\n[scraper:scrape] Error caching: " + error.message);
+						return;
+					});
+
+					await parser
+						.parseCache("vnx-vn-article")
+						.then(() => {
+							console.log("\n[scraper:scrape] Cache parsed");
+						})
+						.catch((error) => {
+							console.log("\n[scraper:scrape] Error parsing: " + error.message);
+							return;
+						});
+
+					/* ------------- gallery ------------ */
+					await cacher.cacheMany(urlsGallery, mode, false).catch((error) => {
+						console.log("\n[scraper:scrape] Error caching: " + error.message);
+						return;
+					});
+
+					await parser
+						.parseCache("vnx-vn-gallery")
+						.then(() => {
+							console.log("\n[scraper:scrape] Cache parsed");
+						})
+						.catch((error) => {
+							console.log("\n[scraper:scrape] Error parsing: " + error.message);
+							return;
+						});
+
+					// https://vnexpress.net/thoi-su-p2
+
+					let page = parseInt(startUrl.substring(startUrl.lastIndexOf("-p") + 2));
+					page++;
+					startUrl = baseUrl + "-p" + page.toString();
 
 					i--;
 				} catch (error) {

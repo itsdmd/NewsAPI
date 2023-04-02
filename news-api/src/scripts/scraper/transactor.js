@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 import ttVnModel from "../../models/ttArticleVn.js";
 import tnVnModel from "../../models/tnArticleVn.js";
+import vnxVnModel from "../../models/vnxArticleVn.js";
 
 dotenv.config();
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
@@ -50,6 +51,25 @@ export async function addTnVnArticle(article) {
 			// console.log("\n[transactor:addTtVnArticle] Warning: Duplicate key: " + id);
 		} else {
 			console.log("\n[transactor:addTnVnArticle] Error: " + error.message);
+		}
+		return;
+	}
+}
+
+export async function addVnxVnArticle(article) {
+	// console.log("\n[transactor:addVnxVnArticle]");
+
+	try {
+		await vnxVnModel.create(article).then((result) => {
+			// console.log("\n[transactor:addVnxVnArticle] Success. ID: " + result._id);
+		});
+		return;
+	} catch (error) {
+		if (error.message.includes("E11000 duplicate key error")) {
+			let id = error.message.match(/(?<=dup key: { metadata.id: ").*(?=" })/g)[0];
+			// console.log("\n[transactor:addVnxVnArticle] Warning: Duplicate key: " + id);
+		} else {
+			console.log("\n[transactor:addVnxVnArticle] Error: " + error.message);
 		}
 		return;
 	}

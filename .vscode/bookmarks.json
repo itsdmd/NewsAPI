@@ -92,6 +92,31 @@
 					"line": 1132,
 					"column": 9,
 					"label": "tn/div/leg/hl"
+				},
+				{
+					"line": 1421,
+					"column": 6,
+					"label": "vnx"
+				},
+				{
+					"line": 1579,
+					"column": 6,
+					"label": "vnx/tt"
+				},
+				{
+					"line": 1643,
+					"column": 6,
+					"label": "vnx/fig"
+				},
+				{
+					"line": 1685,
+					"column": 8,
+					"label": "vnx/div/hl"
+				},
+				{
+					"line": 1789,
+					"column": 3,
+					"label": "vnx-g"
 				}
 			]
 		}

@@ -613,7 +613,7 @@ export async function parseDom(dom, mode) {
 								url:
 									dom.querySelector(".author-info-top a").href === "javascript:;"
 										? ""
-										: "https://tuoitre.vn" + dom.querySelector(".author-info-top a").href,
+										: "https://thanhnien.vn" + dom.querySelector(".author-info-top a").href,
 							});
 						} else {
 							authors.push({

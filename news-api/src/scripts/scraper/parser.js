@@ -1398,14 +1398,20 @@ export async function parseDom(dom, mode) {
 			case "vnx-vn-feed": {
 				const feedEntries = [];
 
-				dom.querySelectorAll("article.item-news").forEach((itemNews) => {
+				const allNewsItems = dom.querySelectorAll("article.item-news");
+				for (let i = 0; i < allNewsItems.length; i++) {
 					let item = {};
-					item.url = itemNews.querySelector("a").getAttribute("href");
 
-					if (itemNews.querySelector("svg.ic-video")) {
+					try {
+						item.url = allNewsItems[i].querySelector("a").getAttribute("href");
+					} catch (e) {
+						continue;
+					}
+
+					if (allNewsItems[i].querySelector("svg.ic-video")) {
 						// VnExpress use blob and m3u8 for video streaming so it's not possible to get the video
-						return;
-					} else if (itemNews.querySelector("svg.ic-camera")) {
+						continue;
+					} else if (allNewsItems[i].querySelector("svg.ic-camera")) {
 						item.type = "gallery";
 					} else {
 						item.type = "article";
@@ -1414,7 +1420,7 @@ export async function parseDom(dom, mode) {
 					if (item !== null && item !== undefined) {
 						feedEntries.push(item);
 					}
-				});
+				}
 
 				return feedEntries;
 			}

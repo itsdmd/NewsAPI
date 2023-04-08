@@ -1487,7 +1487,6 @@ export async function parseDom(dom, mode) {
 				let pubdate = {};
 				try {
 					pubdate.isodate = dom.querySelector("meta[name='pubdate']").getAttribute("content");
-					pubdate.isodate = new Date(pubdate.isodate).toISOString();
 				} catch (e) {
 					console.log("\n[parser:parseDom] pubdate/isodate");
 				}

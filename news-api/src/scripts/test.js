@@ -25,7 +25,9 @@ async function test() {
 	// await cacher.cacheOne("https://vnexpress.net/cao-toc-dau-giay-phan-thiet-truoc-mot-thang-thong-xe-4586719.html", "vnx-vn", false);
 	// await parser.parseCache("vnx-vn-gallery");
 
-	await scraper.scrape("vnx-vn", "https://vnexpress.net/thoi-su", "https://vnexpress.net/thoi-su-p2", 2);
+	await scraper.scrape("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-2.htm", 10);
+	await scraper.scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/2.htm", 10);
+	await scraper.scrape("vnx-vn", "https://vnexpress.net/thoi-su", "https://vnexpress.net/thoi-su-p2", 10);
 }
 
 await test();

@@ -16,6 +16,6 @@ async function scrape(mode, baseUrl, startUrl, limit = 1) {
 
 await scrape("tt-vn", "https://tuoitre.vn/timeline/3/", "https://tuoitre.vn/timeline/3/trang-1.htm", 1);
 await scrape("tn-vn", "https://thanhnien.vn/timelinelist/1854/", "https://thanhnien.vn/timelinelist/1854/1.htm", 1);
-await scraper.scrape("vnx-vn", "https://vnexpress.net/thoi-su", "https://vnexpress.net/thoi-su-p1", 1);
+await scrape("vnx-vn", "https://vnexpress.net/thoi-su", "https://vnexpress.net/thoi-su-p1", 1);
 
 process.exit(0);

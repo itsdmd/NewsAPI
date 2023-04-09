@@ -127,3 +127,4 @@ dist
 .pnp.*
 
 *.rest*
+**/vision_api.json

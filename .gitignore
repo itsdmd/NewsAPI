@@ -128,3 +128,4 @@ dist
 
 *.rest*
 **/vision_api.json
+news-api/VisionAPI/.quota

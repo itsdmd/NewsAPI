@@ -1,3 +1,5 @@
+<img src="./logo.png" alt="Logo" width="100"/>
+
 # Vietnamese News API
 
 **Crawl, scrape, store and serve news articles from 3 of the most popular Vietnamese news websites: _[VnExpress](https://vnexpress.net/)_, _[Tuoi Tre](https://tuoitre.vn/)_ and _[Thanh Nien](https://thanhnien.vn/)_.**

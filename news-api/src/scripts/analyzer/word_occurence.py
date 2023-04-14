@@ -158,9 +158,8 @@ def get_all_words(colName="TN", filter=[], limitArticles=-1):
 
 def get_word_single_occ(array, mode="default", limit=-1):
     """Count the number of occurences of single words"""
-    result = pd.Series(array).value_counts(
-        normalize=True) if (limit <= 0) else pd.Series(array).value_counts(
-            normalize=True)[:limit]
+    result = pd.Series(array).value_counts() if (
+        limit <= 0) else pd.Series(array).value_counts()[:limit]
 
     if (mode == "default"):
         return result
@@ -181,9 +180,8 @@ def get_word_pair_occ(array, mode="default", limit=-1):
     a, b = itertools.tee(array)
     next(b, None)
 
-    result = pd.Series(zip(a, b)).value_counts(
-        normalize=True) if (limit <= 0) else pd.Series(zip(a, b)).value_counts(
-            normalize=True)[:limit]
+    result = pd.Series(zip(a, b)).value_counts() if (
+        limit <= 0) else pd.Series(zip(a, b)).value_counts()[:limit]
 
     if (mode == "default"):
         return result.sort_values(ascending=False)

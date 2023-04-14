@@ -5,7 +5,7 @@ import * as query from "../scripts/query.js";
 export const dateRouter = express.Router();
 const fieldRouter = express.Router({ mergeParams: true });
 
-function dateStringToObj(input) {
+export function dateStringToObj(input) {
 	/* -------------- date -------------- */
 	const splittedDate = input.split("-");
 	if (splittedDate.length != 3) {

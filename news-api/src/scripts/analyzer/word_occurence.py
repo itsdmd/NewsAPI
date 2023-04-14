@@ -21,36 +21,95 @@ TN = DB["tn_vn_articles"]
 VNX = DB["vnx_vn_articles"]
 
 PUNCTUATION = [
-    "!", '"', "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/",
-    ":", ";", "<", "=", ">", "?", "@", "[", "\\", "]", "^", "_", "`", "{", "|",
-    "}", "~", "”", "“", "’", "‘", "…", "–", "—", "•", "·", "»", "«", "©", "®",
-    "™", "§", "¶", "•", "‹", "›",
+    "!",
+    '"',
+    "#",
+    "$",
+    "%",
+    "&",
+    "'",
+    "(",
+    ")",
+    "*",
+    "+",
+    ",",
+    "-",
+    ".",
+    "/",
+    ":",
+    ";",
+    "<",
+    "=",
+    ">",
+    "?",
+    "@",
+    "[",
+    "\\",
+    "]",
+    "^",
+    "_",
+    "`",
+    "{",
+    "|",
+    "}",
+    "~",
+    "”",
+    "“",
+    "’",
+    "‘",
+    "…",
+    "–",
+    "—",
+    "•",
+    "·",
+    "»",
+    "«",
+    "©",
+    "®",
+    "™",
+    "§",
+    "¶",
+    "•",
+    "‹",
+    "›",
 ]
 
 
-def get_all_words(col, filter=[], limit=-1):
+def get_all_words(colName="TN", filter=[], limitArticles=-1):
     pipeline = [
         # sort by isodate, descending
-        {"$sort": {"metadata.pubdate.isodate": -1}},
-    ]
-    
-    pipeline.append(
-        # limit the number of documents
-        {"$limit": limit},
-    ) if (limit > 0) else None
-    
-    filter.extend([
-        {"content.type": "text"},
-        {"content.content": {"$exists": True}}
-    ])
-    
-    pipeline.extend([
-        # split each content subdocument into a document
-        {"$unwind": "$content"},
-        # filter out content subdocuments that are not text
+        {
+            "$sort": {
+                "metadata.pubdate.isodate": -1
+            }
+        },
+        # filter articles
         {
             "$match": {
                 "$and": filter,
+            }
+        }
+    ]
+
+    pipeline.append(
+        # limit the number of documents
+        {"$limit": limitArticles}) if (limitArticles > 0) else None
+
+    pipeline.extend([
+        # split each content subdocument into a document
+        {
+            "$unwind": "$content"
+        },
+        # take only text content
+        {
+            "$match": {
+                "$and": [{
+                    "content.type": "text"
+                }, {
+                    "content.content": {
+                        "$exists": True
+                    }
+                }],
             }
         },
         # project only the text field
@@ -59,21 +118,32 @@ def get_all_words(col, filter=[], limit=-1):
                 "content.content": 1
             }
         }
+        # text_content_filter
     ])
+
+    if (colName == "TN"):
+        col = TN
+    elif (colName == "TT"):
+        col = TT
+    elif (colName == "VNX"):
+        col = VNX
 
     all_words = []
     for doc in tqdm(col.aggregate(pipeline)):
         words = doc["content"]["content"].lower().split(" ")
 
         # remove punctuation
-        words = [w.translate(str.maketrans(
-            "", "", "".join(PUNCTUATION))).strip() for w in words]
+        words = [
+            w.translate(str.maketrans("", "", "".join(PUNCTUATION))).strip()
+            for w in words
+        ]
 
         og_len = len(words)
         cur_len = og_len
 
         for i in range(og_len):
-            if ((words[i] == "") or (words[i].isnumeric())):
+            # if blank or numeric, remove
+            if ((words[i] == "") or (words[i].isdigit())):
                 words.remove(words[i])
                 cur_len -= 1
 
@@ -86,26 +156,48 @@ def get_all_words(col, filter=[], limit=-1):
     return all_words
 
 
-def get_word_single_freq(array):
+def get_word_single_occ(array, mode="default", limit=-1):
     """Count the number of occurences of single words"""
-    return pd.Series(array).value_counts()
+    result = pd.Series(array).value_counts(
+        normalize=True) if (limit <= 0) else pd.Series(array).value_counts(
+            normalize=True)[:limit]
+
+    if (mode == "default"):
+        return result
+    elif (mode == "json"):
+        return result.to_json(orient="index", force_ascii=False)
+    elif (mode == "csv"):
+        return result.to_csv(sep=",",
+                             encoding="utf-8",
+                             index=True,
+                             header=False)
 
 
-def get_word_pair_freq(array):
+def get_word_pair_occ(array, mode="default", limit=-1):
     """Count the number of occurences of word pairs
-    
+
     Reference: https://stackoverflow.com/a/54309692
     """
     a, b = itertools.tee(array)
     next(b, None)
-    return pd.Series(zip(a, b)).value_counts()
+
+    result = pd.Series(zip(a, b)).value_counts(
+        normalize=True) if (limit <= 0) else pd.Series(zip(a, b)).value_counts(
+            normalize=True)[:limit]
+
+    if (mode == "default"):
+        return result.sort_values(ascending=False)
+    elif (mode == "json"):
+        return result.to_json(orient="index", force_ascii=False)
+    elif (mode == "csv"):
+        return result.to_csv(sep=",",
+                             encoding="utf-8",
+                             index=True,
+                             header=False)
 
 
-def write_to_file(file_dir, content, format="csv", limit=-1):
+def write_to_file(file_dir, content, format="csv"):
     """Write the analytics to a file, including the content and its number of occurences"""
-    if (limit > 0):
-        content = content[:limit]
-
     if (format == "csv"):
         content.to_csv(file_dir,
                        sep=",",
@@ -113,10 +205,7 @@ def write_to_file(file_dir, content, format="csv", limit=-1):
                        index=True,
                        header=False)
     elif (format == "json"):
-        content.to_json(file_dir,
-                        orient="index",
-                        force_ascii=False,
-                        date_format="iso")
+        content.to_json(file_dir, orient="index", force_ascii=False)
     elif (format == "txt"):
         with open(file_dir, "w") as f:
             for word, freq in content.items():
@@ -130,42 +219,51 @@ def main():
     day = now.strftime("%d")
     month = now.strftime("%m")
     year = now.strftime("%Y")
-    
+
     # construct filter for articles published today
     filter = [
-        {"metadata.pubdate.day": day},
-        {"metadata.pubdate.month": month},
-        {"metadata.pubdate.year": year},
+        {
+            "metadata.pubdate.day": day
+        },
+        {
+            "metadata.pubdate.month": month
+        },
+        {
+            "metadata.pubdate.year": year
+        },
     ]
-    
+
     # get all words from articles published today
-    words = get_all_words(TT, filter)
-    words.extend(get_all_words(TN, filter))
-    words.extend(get_all_words(VNX, filter))
-    
+    limit = 50
+    words = get_all_words("TT", filter, limit)
+    words.extend(get_all_words("TN", filter, limit))
+    words.extend(get_all_words("VNX", filter, limit))
+
     # top 50 words - csv
-    ws_limit = 50
-    ws_occ = get_word_single_freq(words)
-    ws_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_single_occ_top_" + str(ws_limit) + "_" + year + "-" + month + "-" + day + ".csv")
-    write_to_file(ws_file_dir, ws_occ, "csv", ws_limit)
-    
+    ws_occ = get_word_single_occ(words)
+    ws_file_dir = os.path.join(
+        os.path.dirname(__file__), "./data/word_single_occ_top_" + str(limit) +
+        "_" + year + "-" + month + "-" + day + ".csv")
+    write_to_file(ws_file_dir, ws_occ, "csv")
+
     # top 50 words - json
-    ws_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_single_occ_top_" + str(ws_limit) + "_" + year + "-" + month + "-" + day + ".json")
-    write_to_file(ws_file_dir, ws_occ, "json", ws_limit)
+    ws_file_dir = os.path.join(
+        os.path.dirname(__file__), "./data/word_single_occ_top_" + str(limit) +
+        "_" + year + "-" + month + "-" + day + ".json")
+    write_to_file(ws_file_dir, ws_occ, "json")
 
     # top 50 word pairs - csv
-    wp_limit = 50
-    wp_occ = get_word_pair_freq(words)
-    wp_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_pair_occ_top_" + str(wp_limit) + "_" + year + "-" + month + "-" + day + ".csv")
-    write_to_file(wp_file_dir, wp_occ, "csv", wp_limit)
+    wp_occ = get_word_pair_occ(words)
+    wp_file_dir = os.path.join(
+        os.path.dirname(__file__), "./data/word_pair_occ_top_" + str(limit) +
+        "_" + year + "-" + month + "-" + day + ".csv")
+    write_to_file(wp_file_dir, wp_occ, "csv")
 
     # top 50 word pairs - json
-    wp_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_pair_occ_top_" + str(wp_limit) + "_" + year + "-" + month + "-" + day + ".json")
-    write_to_file(wp_file_dir, wp_occ, "json", wp_limit)
+    wp_file_dir = os.path.join(
+        os.path.dirname(__file__), "./data/word_pair_occ_top_" + str(limit) +
+        "_" + year + "-" + month + "-" + day + ".json")
+    write_to_file(wp_file_dir, wp_occ, "json")
 
 
 if __name__ == "__main__":

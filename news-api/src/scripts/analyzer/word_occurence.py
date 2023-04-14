@@ -111,7 +111,12 @@ def write_to_file(file_dir, content, format="csv", limit=-1):
                        sep=",",
                        encoding="utf-8",
                        index=True,
-                       header=True)
+                       header=False)
+    elif (format == "json"):
+        content.to_json(file_dir,
+                        orient="index",
+                        force_ascii=False,
+                        date_format="iso")
     elif (format == "txt"):
         with open(file_dir, "w") as f:
             for word, freq in content.items():
@@ -138,19 +143,29 @@ def main():
     words.extend(get_all_words(TN, filter))
     words.extend(get_all_words(VNX, filter))
     
-    # top 10 words
+    # top 50 words - csv
     ws_limit = 50
+    ws_occ = get_word_single_freq(words)
     ws_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_single_freq_top_" + str(ws_limit) + "_" + year + "-" + month + "-" + day + ".csv")
-    ws_freq = get_word_single_freq(words)
-    write_to_file(ws_file_dir, ws_freq, "csv", ws_limit)
+        __file__), "./data/word_single_occ_top_" + str(ws_limit) + "_" + year + "-" + month + "-" + day + ".csv")
+    write_to_file(ws_file_dir, ws_occ, "csv", ws_limit)
+    
+    # top 50 words - json
+    ws_file_dir = os.path.join(os.path.dirname(
+        __file__), "./data/word_single_occ_top_" + str(ws_limit) + "_" + year + "-" + month + "-" + day + ".json")
+    write_to_file(ws_file_dir, ws_occ, "json", ws_limit)
 
-    # top 10 word pairs
+    # top 50 word pairs - csv
     wp_limit = 50
+    wp_occ = get_word_pair_freq(words)
     wp_file_dir = os.path.join(os.path.dirname(
-        __file__), "./data/word_pair_freq_top_" + str(wp_limit) + "_" + year + "-" + month + "-" + day + ".csv")
-    wp_freq = get_word_pair_freq(words)
-    write_to_file(wp_file_dir, wp_freq, "csv", wp_limit)
+        __file__), "./data/word_pair_occ_top_" + str(wp_limit) + "_" + year + "-" + month + "-" + day + ".csv")
+    write_to_file(wp_file_dir, wp_occ, "csv", wp_limit)
+
+    # top 50 word pairs - json
+    wp_file_dir = os.path.join(os.path.dirname(
+        __file__), "./data/word_pair_occ_top_" + str(wp_limit) + "_" + year + "-" + month + "-" + day + ".json")
+    write_to_file(wp_file_dir, wp_occ, "json", wp_limit)
 
 
 if __name__ == "__main__":

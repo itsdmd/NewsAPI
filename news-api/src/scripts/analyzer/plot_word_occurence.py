@@ -14,7 +14,10 @@ def main():
         for row in plots:
             try:
                 if (row[0] != ""):
-                    x.append(row[0].split("'")[1] + " " + row[0].split("'")[3])
+                    if (row[0].find("'") == -1):
+                        x.append(row[0])
+                    else:
+                        x.append(row[0].split("'")[1] + " " + row[0].split("'")[3])
                     y.append(int(row[1]))
                 else:
                     continue

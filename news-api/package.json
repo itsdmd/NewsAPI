@@ -7,7 +7,8 @@
 		"dev": "nodemon ./src/server.js",
 		"refetch": "node ./src/scripts/refetch.js",
 		"start": "node ./src/server.js",
-		"word_freq": "source ./src/scripts/analyzer/bin/activate && python ./src/scripts/analyzer/word_freq.py"
+		"word_occ": "source ./src/scripts/analyzer/bin/activate && python ./src/scripts/analyzer/word_occurence.py",
+		"plot_word_occ": "source ./src/scripts/analyzer/bin/activate && python ./src/scripts/analyzer/plot_word_occurence.py"
 	},
 	"author": "",
 	"license": "ISC",

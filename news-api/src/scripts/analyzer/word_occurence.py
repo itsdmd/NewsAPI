@@ -87,12 +87,12 @@ def get_all_words(col, filter=[], limit=-1):
 
 
 def get_word_single_freq(array):
-    """Count the frequency of single words"""
+    """Count the number of occurences of single words"""
     return pd.Series(array).value_counts()
 
 
 def get_word_pair_freq(array):
-    """Count the frequency of word pairs
+    """Count the number of occurences of word pairs
     
     Reference: https://stackoverflow.com/a/54309692
     """
@@ -102,7 +102,7 @@ def get_word_pair_freq(array):
 
 
 def write_to_file(file_dir, content, format="csv", limit=-1):
-    """Write the analytics to a file, including the content and its frequency"""
+    """Write the analytics to a file, including the content and its number of occurences"""
     if (limit > 0):
         content = content[:limit]
 

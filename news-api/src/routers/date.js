@@ -71,7 +71,7 @@ dateRouter.get("/:date", async (req, res) => {
 		const result = await query.query(dateObj, { _id: 0, content: 0, __v: 0 });
 		res.status(200).json(result);
 	} catch (err) {
-		res.status(500).json({ error: "Something went wrong" });
+		res.status(500).json({ error: err.message });
 	}
 });
 dateRouter.get("/:date/:offset", async (req, res) => {
@@ -85,7 +85,7 @@ dateRouter.get("/:date/:offset", async (req, res) => {
 		const result = await query.query(dateObj, { _id: 0, content: 0, __v: 0 }, parseInt(req.params.offset));
 		res.status(200).json(result);
 	} catch (err) {
-		res.status(500).json({ error: "Something went wrong" });
+		res.status(500).json({ error: err.message });
 	}
 });
 
@@ -108,7 +108,7 @@ fieldRouter.get("/:fields", async (req, res) => {
 		const result = await query.query(dateObj, fieldStringToObj(req.params.fields), 0);
 		res.status(200).json(result);
 	} catch (err) {
-		res.status(500).json({ error: "Something went wrong" });
+		res.status(500).json({ error: err.message });
 	}
 });
 
@@ -123,6 +123,6 @@ fieldRouter.get("/:fields/:offset", async (req, res) => {
 		const result = await query.query(dateObj, fieldStringToObj(req.params.fields), parseInt(req.params.offset));
 		res.status(200).json(result);
 	} catch (err) {
-		res.status(500).json({ error: "Something went wrong" });
+		res.status(500).json({ error: err.message });
 	}
 });

@@ -23,6 +23,7 @@
         - [Run the API server](#run-the-api-server)
         - [Crawl and scrape articles](#crawl-and-scrape-articles)
         - [Query the database](#query-the-database)
+        - [Run analytics (experimental)](#run-analytics-experimental)
 
 
 ## API Documentation
@@ -64,7 +65,7 @@ The news served by the API are mostly related to politic, business and civic eve
 3. Clone this repository and install the dependencies
 
     ```bash
-    git clone https://github.com/itsdmd/VietnameseNewsAPI.git
+    git clone --depth=1 https://github.com/itsdmd/VietnameseNewsAPI.git
     cd ./VietnameseNewsAPI/news-api
     npm install
     ```
@@ -82,6 +83,8 @@ The news served by the API are mostly related to politic, business and civic eve
     ```
 
 ### Usage
+
+> All commands must be executed inside `news-api` directory
 
 #### Run the API server
 
@@ -123,3 +126,32 @@ To increase the query and/or sorting speed, you can create an [index](https://ww
 # mongosh - Create ascending index for the publish date
 db.collection.createIndex( { "metadata.pubdate.isodate": 1 } )
 ```
+
+#### Run analytics (experimental)
+
+1. Make sure [Python 3](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/installation/) is installed on your machine.
+
+2. Install pip packages. This will create and enable a [virtual environment](https://docs.python.org/3/library/venv.html) inside `./news-api/src/scripts/analyzer` directory.
+
+    ```bash
+    npm run pip_install
+    ```
+
+3. The provided scripts will generate a CSV file and a JSON file in the `./news-api/data` directory, showing 50 most occurred words and word pairs in today's articles' content.
+
+    ```bash
+    npm run word_occ
+    ```
+
+4. Plot out the data from CSV file
+
+    ```bash
+    npm run plot_word_occ
+    ```
+
+5. Disable the virtual environment
+
+    ```bash
+    cd ./news-api/src/scripts/analyzer # skip this line if you are already in this directory
+    deactivate
+    ```

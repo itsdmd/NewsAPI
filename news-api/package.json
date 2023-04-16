@@ -7,6 +7,7 @@
 		"dev": "nodemon ./src/server.js",
 		"refetch": "node ./src/scripts/refetch.js",
 		"start": "node ./src/server.js",
+		"pip_install": "source ./src/scripts/analyzer/bin/activate && pip install -r ./src/scripts/analyzer/bin/requirements.txt",
 		"word_occ": "source ./src/scripts/analyzer/bin/activate && python ./src/scripts/analyzer/word_occurence.py",
 		"plot_word_occ": "source ./src/scripts/analyzer/bin/activate && python ./src/scripts/analyzer/plot_word_occurence.py"
 	},

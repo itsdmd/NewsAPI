@@ -1,13 +1,11 @@
 import Head from "next/head";
-import Image from "next/image";
 import { Inter } from "next/font/google";
-import { SignIn, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { SignIn, SignInButton, SignOutButton, useUser, UserButton } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+export default function Layout({ children }) {
 	const user = useUser();
-
 	return (
 		<>
 			<Head>
@@ -87,17 +85,28 @@ export default function Home() {
 									</ul>
 								</li>
 							</ul>
-							<div>{user.isSignedIn ? <SignOutButton className="btn btn-danger" /> : <SignInButton className="btn btn-success" />}</div>
+							<div>
+								{user.isSignedIn ? (
+									<div className="d-flex gap-4">
+										<UserButton />
+										<SignOutButton className="btn btn-danger" />
+									</div>
+								) : (
+									<SignInButton className="btn btn-success" />
+								)}
+							</div>
 						</div>
 					</div>
 				</nav>
 				<SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
-				<script
-					src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-					integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-					crossOrigin="anonymous"
-				></script>
+
+				{children}
 			</main>
+			<script
+				src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+				integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+				crossOrigin="anonymous"
+			></script>
 		</>
 	);
 }

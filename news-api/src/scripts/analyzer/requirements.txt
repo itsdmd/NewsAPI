@@ -1,0 +1,6 @@
+pipreqs
+matplotlib
+pandas
+pymongo
+python-dotenv
+tqdm
